@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>아임웹 클라우드 이관 — 계약 미팅 체크리스트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { sans: ['Noto Sans KR', 'sans-serif'] },
+        colors: {
+          navy: { 50:'#eff6ff', 100:'#dbeafe', 200:'#bfdbfe', 300:'#93c5fd', 400:'#60a5fa', 500:'#3b82f6', 600:'#2563eb', 700:'#1d4ed8', 800:'#1e3a5f', 900:'#172554', 950:'#0f1729' },
+          teal: '#14b8a6', light: '#f8fafc', dark: '#0f172a',
+          amber: { 400:'#fbbf24', 500:'#f59e0b' },
+          red: { 400:'#f87171', 500:'#ef4444' },
+          green: { 400:'#4ade80', 500:'#22c55e' }
+        }
+      }
+    }
+  }
+</script>
+<style>
+  :root {
+    --c50:#eff6ff; --c100:#dbeafe; --c200:#bfdbfe; --c300:#93c5fd; --c400:#60a5fa;
+    --c500:#3b82f6; --c600:#2563eb; --c700:#1d4ed8; --c800:#1e3a5f; --c900:#172554; --c950:#0f1729;
+    --teal:#14b8a6; --light-bg:#f8fafc; --dark:#0f172a;
+    --amber:#f59e0b; --red:#ef4444; --green:#22c55e;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; font-family:'Noto Sans KR',sans-serif; background:var(--c950); overflow:hidden; height:100%; }
+  #deck { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; }
+  .slide { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0; transform:translateX(60px); transition:opacity .45s cubic-bezier(.4,0,.2,1), transform .45s cubic-bezier(.4,0,.2,1); pointer-events:none; overflow:hidden; }
+  .slide.active { opacity:1; transform:translateX(0); pointer-events:auto; }
+  .slide.prev { opacity:0; transform:translateX(-60px); }
+  #progress-bar { position:fixed; top:0; left:0; height:3px; background:linear-gradient(90deg,var(--c400),var(--c300)); transition:width .4s ease; z-index:100; box-shadow:0 0 8px rgba(96,165,250,0.4); }
+  #nav { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:16px; z-index:100; background:rgba(15,23,41,.85); backdrop-filter:blur(12px); padding:8px 20px; border-radius:99px; border:1px solid rgba(255,255,255,.1); }
+  .nav-btn { width:44px; height:44px; border-radius:50%; border:1.5px solid rgba(255,255,255,.25); background:rgba(255,255,255,.08); backdrop-filter:blur(12px); color:#fff; font-size:18px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .2s, border-color .2s, transform .15s; }
+  .nav-btn:hover { background:rgba(255,255,255,.18); border-color:rgba(255,255,255,.5); transform:scale(1.08); }
+  .nav-btn:active { transform:scale(.95); }
+  #counter { color:rgba(255,255,255,.7); font-size:13px; font-weight:500; min-width:56px; text-align:center; letter-spacing:.5px; }
+  .slide-inner { width:100vw; height:100vh; display:flex; flex-direction:column; position:relative; }
+  .section-pill { display:inline-block; padding:6px 18px; border-radius:99px; font-size:13px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; }
+  .heading-line { display:inline-block; position:relative; }
+  .heading-line::after { content:''; position:absolute; left:0; bottom:-4px; height:3px; width:100%; background:linear-gradient(90deg,var(--c400),var(--c300)); border-radius:2px; }
+  .scroll-content { overflow-y:auto; flex:1; padding-bottom:60px; }
+  .slide .text-xs { font-size:14px !important; line-height:1.6 !important; }
+  .slide .text-sm { font-size:16px !important; line-height:1.6 !important; }
+  .slide .text-base { font-size:18px !important; }
+  .slide .text-lg { font-size:22px !important; }
+  .slide .text-xl { font-size:28px !important; }
+  .slide .text-2xl { font-size:32px !important; }
+  .slide h3 { font-size:16px !important; }
+  .q-card { padding:20px !important; margin-bottom:14px !important; }
+  .q-card .font-bold { font-size:15px !important; }
+  .q-card p { font-size:14px !important; line-height:1.65 !important; }
+  .doc-tag { font-size:13px !important; padding:5px 14px !important; }
+  .badge { font-size:11px !important; padding:3px 10px !important; }
+  .risk-critical p, .risk-high p, .risk-medium p { font-size:14px !important; line-height:1.6 !important; }
+  table th { font-size:13px !important; }
+  table td { font-size:13px !important; }
+  .slide ul li { font-size:14px !important; line-height:1.7 !important; }
+  .scroll-content::-webkit-scrollbar { width:4px; }
+  .scroll-content::-webkit-scrollbar-track { background:transparent; }
+  .scroll-content::-webkit-scrollbar-thumb { background:rgba(255,255,255,.2); border-radius:4px; }
+  .risk-critical { background:rgba(239,68,68,.15); border:1px solid rgba(239,68,68,.3); }
+  .risk-high { background:rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.3); }
+  .risk-medium { background:rgba(96,165,250,.12); border:1px solid rgba(96,165,250,.3); }
+  .badge-critical { background:#ef4444; color:#fff; }
+  .badge-high { background:#f59e0b; color:#fff; }
+  .badge-medium { background:var(--c400); color:#fff; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700; letter-spacing:.5px; }
+  .q-card { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:16px; margin-bottom:10px; }
+  .q-card:hover { background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.2); }
+  .doc-tag { display:inline-block; padding:3px 10px; border-radius:6px; font-size:11px; font-weight:600; background:rgba(20,184,166,.15); color:#5eead4; border:1px solid rgba(20,184,166,.3); margin:2px; }
+  @media (max-width:768px) {
+    .slide-inner { padding:16px !important; }
+    .grid.grid-cols-3 { grid-template-columns:repeat(2,1fr) !important; }
+    .grid.grid-cols-2 { grid-template-columns:1fr !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+<div id="deck">
+
+<!-- SLIDE 1: Title -->
+<div class="slide active" id="s1">
+  <div class="slide-inner" style="background:linear-gradient(145deg,var(--c950) 0%,var(--c800) 55%,var(--c900) 100%);">
+    <div class="flex flex-col items-center justify-center flex-1 text-center px-8">
+      <div class="mb-6 text-7xl" style="filter:drop-shadow(0 0 24px rgba(96,165,250,0.4))">🛒</div>
+      <div class="section-pill mb-5" style="background:rgba(96,165,250,.15);color:var(--c300);border:1px solid rgba(96,165,250,.3)">
+        PROJECT MEETING · 2026
+      </div>
+      <h1 class="font-black text-white mb-3" style="font-size:clamp(2rem,5vw,3.8rem);line-height:1.1;letter-spacing:-1px;">
+        아임웹 → 클라우드 이관<br>프로젝트 협의
+      </h1>
+      <p class="font-light mb-2" style="font-size:clamp(.9rem,2vw,1.2rem);color:var(--c300);letter-spacing:2px;">
+        원클릭사이트제작이 제안드리는 이관 전략
+      </p>
+      <div class="mt-3 h-px w-48" style="background:linear-gradient(90deg,transparent,var(--c400),transparent)"></div>
+      <p class="mt-5 text-sm" style="color:rgba(255,255,255,.45);">쇼핑몰 클라우드 리뉴얼 · 서버리스 아키텍처</p>
+    </div>
+    <div class="flex justify-center pb-10 gap-10">
+      <div class="text-center"><div class="text-xl font-black" style="color:var(--c400)">800만원</div><div class="text-xs mt-1" style="color:rgba(255,255,255,.5)">제안 금액</div></div>
+      <div class="text-center"><div class="text-xl font-black" style="color:var(--c400)">14일</div><div class="text-xs mt-1" style="color:rgba(255,255,255,.5)">개발기간</div></div>
+      <div class="text-center"><div class="text-xl font-black" style="color:var(--c400)">6명</div><div class="text-xs mt-1" style="color:rgba(255,255,255,.5)">전담 팀</div></div>
+      <div class="text-center"><div class="text-xl font-black" style="color:var(--c400)">Next.js + AWS</div><div class="text-xs mt-1" style="color:rgba(255,255,255,.5)">기술 스택</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 2: Company Intro -->
+<div class="slide" id="s2">
+  <div class="slide-inner" style="background:var(--light-bg);">
+    <div class="flex items-center px-14 pt-10 pb-0 shrink-0">
+      <div class="section-pill" style="background:var(--c100);color:var(--c800);border:1px solid var(--c200)">ABOUT US</div>
+    </div>
+    <div class="flex flex-col justify-center flex-1 px-14 pb-8">
+      <h2 class="font-black mb-6" style="font-size:clamp(1.6rem,3vw,2.4rem);color:var(--c800);line-height:1.15;">
+        <span class="heading-line">원클릭사이트제작 소개</span>
+      </h2>
+      <div class="grid grid-cols-2 gap-6">
+        <div>
+          <p class="text-sm mb-5" style="color:#374151;line-height:1.8">
+            저희는 <b>이커머스 전문 개발팀</b>으로, CAFE24/아임웹/Shopify 기반 쇼핑몰을 독립몰로 전환하는 프로젝트를 다수 수행해왔습니다.
+            최근 <b>Dr.**** C 화장품 브랜드몰</b>의 CAFE24 이관을 성공적으로 완료한 경험이 있어, SaaS 플랫폼 이관 과정에서 발생할 수 있는 리스크를 잘 알고 있습니다.
+          </p>
+          <div class="grid grid-cols-3 gap-3 mb-5">
+            <div class="rounded-xl p-4 text-center" style="background:#fff;border:1.5px solid var(--c200);">
+              <div class="text-2xl font-black" style="color:var(--c600)">700만</div>
+              <div class="text-xs mt-1" style="color:#6b7280">가입자 규모 경험</div>
+            </div>
+            <div class="rounded-xl p-4 text-center" style="background:#fff;border:1.5px solid var(--c200);">
+              <div class="text-2xl font-black" style="color:var(--c600)">530억</div>
+              <div class="text-xs mt-1" style="color:#6b7280">GMV 처리 경험</div>
+            </div>
+            <div class="rounded-xl p-4 text-center" style="background:#fff;border:1.5px solid var(--c200);">
+              <div class="text-2xl font-black" style="color:var(--c600)">15년+</div>
+              <div class="text-xs mt-1" style="color:#6b7280">커머스 경력 (리드)</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h3 class="font-bold text-sm mb-3" style="color:var(--c800)">전담 팀 구성 (6명)</h3>
+          <div class="space-y-2">
+            <div class="flex items-center gap-3 rounded-lg p-3" style="background:#fff;border:1px solid var(--c200);">
+              <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-black shrink-0" style="background:var(--c400);color:var(--c950)">J</div>
+              <div><div class="text-sm font-bold" style="color:var(--c800)">Jamie (양승현)</div><div class="text-xs" style="color:#6b7280">프로젝트 리드 · 고려대 · 풀스택</div></div>
+            </div>
+            <div class="flex items-center gap-3 rounded-lg p-3" style="background:#fff;border:1px solid var(--c200);">
+              <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-black shrink-0" style="background:var(--c400);color:var(--c950)">T</div>
+              <div><div class="text-sm font-bold" style="color:var(--c800)">Tom</div><div class="text-xs" style="color:#6b7280">커머스 아키텍트 · KAIST · <b>前 쿠팡 EM</b></div></div>
+            </div>
+            <div class="flex items-center gap-3 rounded-lg p-3" style="background:#fff;border:1px solid var(--c200);">
+              <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-black shrink-0" style="background:var(--c400);color:var(--c950)">+4</div>
+              <div><div class="text-sm font-bold" style="color:var(--c800)">Joon · Sera · Daniel · Grace</div><div class="text-xs" style="color:#6b7280">데이터(KAIST) · UI/UX · 백엔드(결제) · PM/QA</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3: 아임웹 Overview -->
+<div class="slide" id="s3">
+  <div class="slide-inner" style="background:linear-gradient(135deg,var(--c950) 0%,var(--c800) 100%);">
+    <div class="flex flex-col justify-center flex-1 px-14 pb-8 pt-10">
+      <div class="section-pill mb-6" style="background:rgba(96,165,250,.15);color:var(--c300);border:1px solid rgba(96,165,250,.3)">IMWEB OVERVIEW</div>
+      <h2 class="font-black text-white mb-6" style="font-size:clamp(1.6rem,3vw,2.4rem);line-height:1.15;">
+        <span class="heading-line">아임웹에서 독립몰로, 왜?</span>
+      </h2>
+      <div class="grid grid-cols-2 gap-6">
+        <div>
+          <div class="text-sm font-bold mb-3" style="color:rgba(255,255,255,.5)">현재: 아임웹 호스팅</div>
+          <div class="rounded-2xl p-5 mb-3" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);">
+            <p class="text-sm mb-3" style="color:rgba(255,255,255,.8);line-height:1.7">
+              아임웹은 <b>임대 아파트</b>와 같습니다.<br>
+              입주(가입)하면 바로 쇼핑몰을 운영할 수 있지만,<br>
+              벽을 허물거나 구조를 바꿀 수는 없습니다.
+            </p>
+            <div class="space-y-2">
+              <div class="flex items-start gap-3 text-sm" style="color:rgba(255,255,255,.65)">
+                <span style="color:#f87171">&#10007;</span> 기능 확장 거의 불가 — 커스텀 개발 제약이 큼
+              </div>
+              <div class="flex items-start gap-3 text-sm" style="color:rgba(255,255,255,.65)">
+                <span style="color:#f87171">&#10007;</span> SEO 제약 — 메타 태그/URL 구조 제어 한계
+              </div>
+              <div class="flex items-start gap-3 text-sm" style="color:rgba(255,255,255,.65)">
+                <span style="color:#f87171">&#10007;</span> 데이터(회원/주문)를 직접 소유하지 못함
+              </div>
+              <div class="flex items-start gap-3 text-sm" style="color:rgba(255,255,255,.65)">
+                <span style="color:#f87171">&#10007;</span> 성능 최적화 불가 — 이미지/코드/캐싱 직접 제어 X
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="text-sm font-bold mb-3" style="color:var(--c400)">전환 후: 클라우드 독립몰 (자가 소유)</div>
+          <div class="rounded-2xl p-5 mb-3" style="background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.3);">
+            <p class="text-sm mb-3" style="color:rgba(255,255,255,.8);line-height:1.7">
+              독립몰은 <b>내 건물</b>을 짓는 것입니다.<br>
+              원하는 구조로 자유롭게 설계하고,<br>
+              모든 데이터를 직접 소유합니다.
+            </p>
+            <div class="space-y-2">
+              <div class="flex items-start gap-3 text-sm" style="color:rgba(255,255,255,.75)">
+                <span style="color:#4ade80">&#10003;</span> 원하는 기능 무제한 추가/커스터마이징 가능
+              </div>
+              <div class="flex items-start gap-3 text-sm" style="color:rgba(255,255,255,.75)">
+                <span style="color:#4ade80">&#10003;</span> SEO 완전 제어 — 검색 유입 극대화
+              </div>
+              <div class="flex items-start gap-3 text-sm" style="color:rgba(255,255,255,.75)">
+                <span style="color:#4ade80">&#10003;</span> 회원/주문/매출 데이터 100% 소유
+              </div>
+              <div class="flex items-start gap-3 text-sm" style="color:rgba(255,255,255,.75)">
+                <span style="color:#4ade80">&#10003;</span> AWS 서버리스 — 호스팅 서버 없이 자동 스케일링
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="rounded-xl p-4 mt-2" style="background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.3);">
+        <p class="text-sm text-center" style="color:rgba(255,255,255,.8)">
+          이관 과정에서 기존 <b style="color:#5eead4">회원 정보, 상품, 주문 내역</b>은 모두 새 시스템으로 안전하게 옮겨집니다. 고객은 변화를 거의 느끼지 못합니다.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4: Migration Risks -->
+<div class="slide" id="s4">
+  <div class="slide-inner" style="background:var(--light-bg);">
+    <div class="flex items-center px-14 pt-10 pb-0 shrink-0">
+      <div class="section-pill" style="background:rgba(245,158,11,.15);color:#b45309;border:1px solid rgba(245,158,11,.3)">MIGRATION RISKS</div>
+    </div>
+    <div class="flex flex-col justify-center flex-1 px-14 pb-8">
+      <h2 class="font-black mb-2" style="font-size:clamp(1.6rem,3vw,2.4rem);color:var(--c800);line-height:1.15;">
+        <span class="heading-line">이관 시 저희가 챙겨드릴 부분</span>
+      </h2>
+      <p class="text-sm mb-5" style="color:#6b7280">아임웹에서 독립몰로 전환할 때 발생할 수 있는 이슈를 미리 파악하고, 안전하게 처리합니다.</p>
+      <div class="grid grid-cols-2 gap-5">
+        <div class="rounded-xl p-5" style="background:#fff;border:1.5px solid var(--c200);">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-xl">📦</span>
+            <h3 class="font-bold text-sm" style="color:var(--c800)">데이터 이관</h3>
+          </div>
+          <ul class="text-sm space-y-2" style="color:#374151;line-height:1.6">
+            <li>회원/상품/주문 데이터를 아임웹 <b>Open API v3</b> + Excel Export로 추출하여 새 시스템으로 옮깁니다</li>
+            <li>기존 비밀번호는 보안상 가져올 수 없어 <b style="color:var(--c600)">임시 비밀번호를 발급</b>하고, 최초 로그인 시 변경을 안내합니다</li>
+            <li>사용자 정의 회원 필드는 <b>일괄 내보내기 미지원</b> — API로 개별 추출합니다</li>
+          </ul>
+        </div>
+        <div class="rounded-xl p-5" style="background:#fff;border:1.5px solid var(--c200);">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-xl">🖼️</span>
+            <h3 class="font-bold text-sm" style="color:var(--c800)">상품 이미지</h3>
+          </div>
+          <ul class="text-sm space-y-2" style="color:#374151;line-height:1.6">
+            <li>아임웹 이미지는 <b>cdn.imweb.me</b>에 저장되며 <b style="color:#ef4444">데이터 백업에 이미지 미포함</b></li>
+            <li>공식 일괄 다운로드 기능 없음 — API로 URL 추출 후 <b>자동화 스크립트</b>로 수집합니다</li>
+            <li>새 S3 + CloudFront로 이미지를 옮기고, 모든 링크를 자동 교체합니다</li>
+          </ul>
+        </div>
+        <div class="rounded-xl p-5" style="background:#fff;border:1.5px solid var(--c200);">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-xl">💳</span>
+            <h3 class="font-bold text-sm" style="color:var(--c800)">결제(PG) 계약</h3>
+          </div>
+          <ul class="text-sm space-y-2" style="color:#374151;line-height:1.6">
+            <li>아임웹에 <b>한 사이트 하나의 PG</b>만 연동 가능 — 현재 PG사 확인 필수</li>
+            <li>KG이니시스/토스페이먼츠는 기존 MID 추가 발급 가능, <b style="color:#f59e0b">네이버페이/카카오 체크아웃은 신규 신청</b> 필요</li>
+            <li>PG 심사에 <b style="color:#f59e0b">1~2주</b> 소요 — 미팅 직후 접수 필요</li>
+          </ul>
+        </div>
+        <div class="rounded-xl p-5" style="background:#fff;border:1.5px solid var(--c200);">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-xl">🌐</span>
+            <h3 class="font-bold text-sm" style="color:var(--c800)">도메인 전환</h3>
+          </div>
+          <ul class="text-sm space-y-2" style="color:#374151;line-height:1.6">
+            <li>아임웹 도메인 이전은 <b>고객지원 채팅으로만</b> 요청 가능 (Auth Code 발급 1~2 영업일)</li>
+            <li>국제 도메인(.com)은 이전 후 <b>60일간 재이전 불가</b> (ICANN 정책)</li>
+            <li>전환 중에도 <b style="color:#22c55e">아임웹을 병행 운영</b>하여 안전하게 이관합니다</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 5: How We Work -->
+<div class="slide" id="s5">
+  <div class="slide-inner" style="background:linear-gradient(135deg,var(--c950) 0%,var(--c800) 100%);">
+    <div class="flex flex-col justify-center flex-1 px-14 pb-8 pt-10">
+      <div class="section-pill mb-6" style="background:rgba(96,165,250,.15);color:var(--c300);border:1px solid rgba(96,165,250,.3)">HOW WE WORK</div>
+      <h2 class="font-black text-white mb-8" style="font-size:clamp(1.6rem,3vw,2.4rem);line-height:1.15;">
+        <span class="heading-line">이렇게 진행합니다</span>
+      </h2>
+      <div class="grid grid-cols-4 gap-4">
+        <div class="rounded-2xl p-5 text-center" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);">
+          <div class="text-3xl mb-3">1</div>
+          <h3 class="font-bold text-sm text-white mb-2">기획 & 설계</h3>
+          <p class="text-sm" style="color:rgba(255,255,255,.6)">DB 스키마 설계<br>와이어프레임<br>아임웹 API 연동<br>이관 매핑 테이블</p>
+          <div class="mt-3 text-xs font-bold" style="color:var(--c400)">1~3일차</div>
+        </div>
+        <div class="rounded-2xl p-5 text-center" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);">
+          <div class="text-3xl mb-3">2</div>
+          <h3 class="font-bold text-sm text-white mb-2">개발</h3>
+          <p class="text-sm" style="color:rgba(255,255,255,.6)">프론트엔드 퍼블리싱<br>백엔드 API<br>결제/배송 연동<br>관리자 페이지</p>
+          <div class="mt-3 text-xs font-bold" style="color:var(--c400)">4~10일차</div>
+        </div>
+        <div class="rounded-2xl p-5 text-center" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);">
+          <div class="text-3xl mb-3">3</div>
+          <h3 class="font-bold text-sm text-white mb-2">이관 & QA</h3>
+          <p class="text-sm" style="color:rgba(255,255,255,.6)">아임웹 데이터 이관<br>이미지 CDN 이관<br>통합 테스트<br>클라이언트 검수</p>
+          <div class="mt-3 text-xs font-bold" style="color:var(--c400)">11~13일차</div>
+        </div>
+        <div class="rounded-2xl p-5 text-center" style="background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3);">
+          <div class="text-3xl mb-3">4</div>
+          <h3 class="font-bold text-sm text-white mb-2">오픈 & 안정화</h3>
+          <p class="text-sm" style="color:rgba(255,255,255,.6)">DNS 전환<br>모니터링<br>아임웹 병행 운영<br>하자보수 시작</p>
+          <div class="mt-3 text-xs font-bold" style="color:var(--c400)">14일차</div>
+        </div>
+      </div>
+      <div class="mt-6 rounded-xl p-4" style="background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.3);">
+        <p class="text-sm text-center" style="color:rgba(255,255,255,.8)">실시간 <b style="color:#5eead4">슬랙/카카오톡 커뮤니케이션</b> + 개발 완료 후 <b style="color:#5eead4">6개월 무상 하자보수</b></p>
+      </div>
+      <!-- Architecture -->
+      <div class="mt-4 rounded-xl p-5" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);">
+        <h3 class="text-sm font-bold text-white mb-3">시스템 아키텍처 — AWS 서버리스</h3>
+        <div class="grid grid-cols-5 gap-3">
+          <div class="rounded-lg p-3 text-center" style="background:rgba(96,165,250,.15);border:1px solid rgba(96,165,250,.3);">
+            <div class="text-xs font-bold" style="color:var(--c400)">Frontend</div>
+            <div class="text-sm font-bold text-white mt-1">Next.js 14+</div>
+            <div class="text-xs mt-1" style="color:rgba(255,255,255,.5)">SSR + 반응형</div>
+          </div>
+          <div class="rounded-lg p-3 text-center" style="background:rgba(96,165,250,.15);border:1px solid rgba(96,165,250,.3);">
+            <div class="text-xs font-bold" style="color:var(--c400)">Backend</div>
+            <div class="text-sm font-bold text-white mt-1">Node.js</div>
+            <div class="text-xs mt-1" style="color:rgba(255,255,255,.5)">Lambda + API GW</div>
+          </div>
+          <div class="rounded-lg p-3 text-center" style="background:rgba(96,165,250,.15);border:1px solid rgba(96,165,250,.3);">
+            <div class="text-xs font-bold" style="color:var(--c400)">Database</div>
+            <div class="text-sm font-bold text-white mt-1">MySQL</div>
+            <div class="text-xs mt-1" style="color:rgba(255,255,255,.5)">AWS RDS</div>
+          </div>
+          <div class="rounded-lg p-3 text-center" style="background:rgba(96,165,250,.15);border:1px solid rgba(96,165,250,.3);">
+            <div class="text-xs font-bold" style="color:var(--c400)">Storage</div>
+            <div class="text-sm font-bold text-white mt-1">S3</div>
+            <div class="text-xs mt-1" style="color:rgba(255,255,255,.5)">이미지/파일</div>
+          </div>
+          <div class="rounded-lg p-3 text-center" style="background:rgba(20,184,166,.12);border:1px solid rgba(20,184,166,.3);">
+            <div class="text-xs font-bold" style="color:#5eead4">CDN</div>
+            <div class="text-sm font-bold text-white mt-1">CloudFront</div>
+            <div class="text-xs mt-1" style="color:rgba(255,255,255,.5)">글로벌 캐싱</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 6: Live Clone Demo -->
+<div class="slide" id="s6">
+  <div class="slide-inner" style="background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#172554 100%);">
+    <div class="flex flex-col items-center justify-center flex-1 text-center px-12">
+      <div class="section-pill mb-4" style="background:rgba(20,184,166,.15);color:#5eead4;border:1px solid rgba(20,184,166,.3)">LIVE DEMO — 1시간 제작</div>
+      <h2 class="font-black text-white mb-3" style="font-size:clamp(1.5rem,3.5vw,2.6rem);line-height:1.15;">
+        <span style="color:#fbbf24">1시간</span> 만에 기존 사이트를 분석하고<br><span style="color:#5eead4">클라우드 데모</span>를 제작했습니다
+      </h2>
+      <p class="text-sm mb-6" style="color:var(--c300);max-width:650px;line-height:1.7">
+        저희는 다수의 SaaS → 클라우드 이관 경험과 <b>자체 기술력</b>을 보유하고 있습니다.<br>
+        더본투비 아임웹 사이트의 구조·상품·이미지를 분석하여 <b>1시간 만에</b> 데모를 제작했습니다.<br>
+        <span style="color:rgba(255,255,255,.5)">아직 미완성이지만, 짧은 시간에도 높은 퀄리티의 이관이 가능하다는 것을 보여드립니다.</span>
+      </p>
+      <a href="https://theborntobi-clone.vercel.app" target="_blank" rel="noopener"
+         style="display:inline-flex;align-items:center;gap:10px;padding:14px 36px;background:linear-gradient(135deg,#14b8a6,#0d9488);color:#fff;font-weight:700;font-size:16px;border-radius:12px;text-decoration:none;box-shadow:0 4px 20px rgba(20,184,166,.4);transition:transform .2s,box-shadow .2s;"
+         onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 30px rgba(20,184,166,.5)'"
+         onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(20,184,166,.4)'">
+        🚀 라이브 데모 보기
+      </a>
+      <p class="text-xs mt-3" style="color:rgba(255,255,255,.4)">theborntobi-clone.vercel.app</p>
+      <div class="grid grid-cols-4 gap-4 mt-8" style="max-width:700px;">
+        <div class="rounded-xl p-3 text-center" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);">
+          <div class="text-lg font-black" style="color:#5eead4">20+</div>
+          <div class="text-xs" style="color:rgba(255,255,255,.5)">실제 상품<br>이미지 반영</div>
+        </div>
+        <div class="rounded-xl p-3 text-center" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);">
+          <div class="text-lg font-black" style="color:var(--c400)">API</div>
+          <div class="text-xs" style="color:rgba(255,255,255,.5)">아임웹 Open API<br>데이터 추출</div>
+        </div>
+        <div class="rounded-xl p-3 text-center" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);">
+          <div class="text-lg font-black" style="color:#fbbf24">Vercel</div>
+          <div class="text-xs" style="color:rgba(255,255,255,.5)">서버리스<br>즉시 배포</div>
+        </div>
+        <div class="rounded-xl p-3 text-center" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);">
+          <div class="text-lg font-black" style="color:#f87171">1h</div>
+          <div class="text-xs" style="color:rgba(255,255,255,.5)">분석→제작→배포<br>전체 소요시간</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: Transition to Questions -->
+<div class="slide" id="s7">
+  <div class="slide-inner" style="background:linear-gradient(135deg,var(--c950) 0%,var(--c800) 100%);">
+    <div class="flex flex-col items-center justify-center flex-1 text-center px-12">
+      <div class="text-5xl mb-6">🤝</div>
+      <h2 class="font-black text-white mb-4" style="font-size:clamp(1.6rem,3.5vw,2.8rem);line-height:1.15;">
+        원활한 진행을 위해<br>몇 가지 확인이 필요합니다
+      </h2>
+      <p class="text-sm mb-8" style="color:var(--c300);max-width:600px;line-height:1.7">
+        프로젝트를 <b>정확한 방향</b>으로, <b>빠르게</b> 시작하기 위해<br>
+        현재 운영 현황과 몇 가지 의사결정 사항을 여쭤보겠습니다.<br>
+        대부분은 간단한 확인이며, 일부 항목은 함께 논의가 필요합니다.
+      </p>
+      <div class="grid grid-cols-3 gap-6" style="max-width:700px;">
+        <div class="text-center">
+          <div class="text-3xl font-black mb-1" style="color:#22c55e">5개</div>
+          <div class="text-sm" style="color:rgba(255,255,255,.6)">간단 확인<br><span class="text-xs">(현황 파악)</span></div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-black mb-1" style="color:var(--c400)">3개</div>
+          <div class="text-sm" style="color:rgba(255,255,255,.6)">함께 결정<br><span class="text-xs">(인프라/방향성)</span></div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-black mb-1" style="color:#fbbf24">1개</div>
+          <div class="text-sm" style="color:rgba(255,255,255,.6)">자료 전달<br><span class="text-xs">(계정/문서)</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: Meeting Objectives -->
+<div class="slide" id="s7">
+  <div class="slide-inner" style="background:var(--light-bg);">
+    <div class="flex items-center px-14 pt-10 pb-0 shrink-0">
+      <div class="section-pill" style="background:var(--c100);color:var(--c800);border:1px solid var(--c200)">MEETING OVERVIEW</div>
+    </div>
+    <div class="flex flex-col justify-center flex-1 px-14 pb-8">
+      <h2 class="font-black mb-6" style="font-size:clamp(1.6rem,3vw,2.4rem);color:var(--c800);line-height:1.15;">
+        <span class="heading-line">미팅 목표 및 아젠다</span>
+      </h2>
+      <div class="grid grid-cols-2 gap-5">
+        <div class="rounded-2xl p-5" style="background:#fff;border:1.5px solid var(--c200);box-shadow:0 4px 24px rgba(30,58,95,0.06);">
+          <div class="text-2xl mb-2">🎯</div>
+          <h3 class="font-bold text-sm mb-2" style="color:var(--c800)">미팅 목적</h3>
+          <ul class="text-xs space-y-1.5" style="color:#374151">
+            <li>• 프로젝트 착수를 위한 <b>필수 정보</b> 확인</li>
+            <li>• <b>의사결정 포인트</b> 중 최우선 항목 합의</li>
+            <li>• 클라이언트 <b>전달 자료</b> 수령 일정 확정</li>
+            <li>• 14일 일정의 <b>병목 리스크</b> 사전 제거</li>
+          </ul>
+        </div>
+        <div class="rounded-2xl p-5" style="background:#fff;border:1.5px solid var(--c200);box-shadow:0 4px 24px rgba(30,58,95,0.06);">
+          <div class="text-2xl mb-2">⏱️</div>
+          <h3 class="font-bold text-sm mb-2" style="color:var(--c800)">미팅 아젠다 (45~60분)</h3>
+          <ul class="text-xs space-y-1.5" style="color:#374151">
+            <li>1. 현황 파악 — 아임웹 계정/데이터 접근 <span style="color:#6b7280">(10분)</span></li>
+            <li>2. 핵심 결정 — PG/도메인/인프라 <span style="color:#6b7280">(15분)</span></li>
+            <li>3. 이관 상세 — 상품/회원/이미지 데이터 <span style="color:#6b7280">(10분)</span></li>
+            <li>4. 운영 준비 — 배송/알림/디자인 <span style="color:#6b7280">(10분)</span></li>
+            <li>5. 자료 전달 일정 합의 <span style="color:#6b7280">(5분)</span></li>
+          </ul>
+        </div>
+        <div class="rounded-2xl p-5 col-span-2" style="background:var(--c800);border:1.5px solid var(--c700);">
+          <h3 class="font-bold text-sm mb-3 text-white">⚠️ 미팅에서 반드시 확정해야 할 TOP 5</h3>
+          <div class="grid grid-cols-5 gap-3">
+            <div class="text-center">
+              <div class="text-lg mb-1">💳</div>
+              <div class="text-xs font-bold text-white">PG 계약 상태</div>
+              <div class="text-xs mt-1" style="color:var(--c300)">아임웹 종속 여부</div>
+            </div>
+            <div class="text-center">
+              <div class="text-lg mb-1">🌐</div>
+              <div class="text-xs font-bold text-white">도메인 등록기관</div>
+              <div class="text-xs mt-1" style="color:var(--c300)">아임웹 vs 외부</div>
+            </div>
+            <div class="text-center">
+              <div class="text-lg mb-1">🖼️</div>
+              <div class="text-xs font-bold text-white">이미지 원본</div>
+              <div class="text-xs mt-1" style="color:var(--c300)">보유 여부</div>
+            </div>
+            <div class="text-center">
+              <div class="text-lg mb-1">📦</div>
+              <div class="text-xs font-bold text-white">상품/회원 규모</div>
+              <div class="text-xs mt-1" style="color:var(--c300)">이관 볼륨 파악</div>
+            </div>
+            <div class="text-center">
+              <div class="text-lg mb-1">🚚</div>
+              <div class="text-xs font-bold text-white">배송 연동 범위</div>
+              <div class="text-xs mt-1" style="color:var(--c300)">추적만 vs 접수</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8: 아임웹 Data Access -->
+<div class="slide" id="s8">
+  <div class="slide-inner" style="background:linear-gradient(135deg,var(--c950) 0%,var(--c800) 100%);">
+    <div class="flex flex-col flex-1 px-14 pb-20 pt-6">
+      <div class="flex items-center gap-3 mb-2">
+        <div class="section-pill" style="background:rgba(96,165,250,.15);color:var(--c300);border:1px solid rgba(96,165,250,.3)">1 / 8</div>
+        <span class="badge badge-critical">CRITICAL</span>
+      </div>
+      <h2 class="font-black text-white mb-3" style="font-size:clamp(1.3rem,2.5vw,1.8rem);line-height:1.15;">
+        <span class="heading-line">아임웹 데이터/계정 접근</span>
+      </h2>
+      <div class="scroll-content">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <h3 class="text-xs font-bold mb-2" style="color:var(--c300)">핵심 질문</h3>
+            <div class="q-card" style="padding:12px !important;margin-bottom:8px !important;">
+              <div class="text-xs font-bold text-white mb-1">Q1. 아임웹 관리자 계정</div>
+              <p class="text-xs" style="color:rgba(255,255,255,.6)">관리자 로그인 정보 공유 가능한지? Open API v3 OAuth 앱 설치 승인?</p>
+            </div>
+            <div class="q-card" style="padding:12px !important;margin-bottom:8px !important;">
+              <div class="text-xs font-bold text-white mb-1">Q2. 이관 데이터 범위</div>
+              <p class="text-xs" style="color:rgba(255,255,255,.6)">회원/상품/주문 외 추가 이관 대상? (포인트, 쿠폰, 구매평, Q&A, 게시물 등)</p>
+            </div>
+            <div class="q-card" style="padding:12px !important;margin-bottom:8px !important;">
+              <div class="text-xs font-bold text-white mb-1">Q3. 아임웹 해지 시점</div>
+              <p class="text-xs" style="color:rgba(255,255,255,.6)">독립몰 오픈 후 병행 운영 기간? 즉시 해지 vs 1~2주 유지?</p>
+            </div>
+            <div class="q-card" style="padding:12px !important;margin-bottom:8px !important;">
+              <div class="text-xs font-bold text-white mb-1">Q4. 이미지 원본 보유 여부</div>
+              <p class="text-xs" style="color:rgba(255,255,255,.6)">cdn.imweb.me 외 고해상도 원본 별도 보관? 없으면 API 스크립트 추출 필요</p>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-xs font-bold mb-2" style="color:var(--teal)">전달받을 자료</h3>
+            <div class="flex flex-wrap gap-1 mb-3">
+              <span class="doc-tag">아임웹 관리자 로그인 정보</span>
+              <span class="doc-tag">Open API OAuth 앱 승인</span>
+              <span class="doc-tag">회원 목록 Excel</span>
+              <span class="doc-tag">상품 목록 Excel</span>
+              <span class="doc-tag">주문 데이터 샘플</span>
+              <span class="doc-tag">현재 요금제 정보</span>
+            </div>
+            <h3 class="text-xs font-bold mb-2" style="color:#f87171">미확인 시 리스크</h3>
+            <div class="rounded-lg p-2 risk-critical mb-2">
+              <p class="text-xs" style="color:rgba(255,255,255,.8)"><b>API 앱 승인 미진행</b> → 수동 Excel Export만 가능, 정확도 및 속도 저하</p>
+            </div>
+            <div class="rounded-lg p-2 risk-critical">
+              <p class="text-xs" style="color:rgba(255,255,255,.8)"><b>아임웹 해지 시 CDN 이미지 접근 불가</b> — 이관 전 해지하면 상품 이미지 전체 소실</p>
+            </div>
+          </div>
+        </div>
+        <!-- API 연동 현황 -->
+        <div class="mt-2 rounded-xl p-3" style="background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.3);">
+          <h3 class="text-xs font-bold mb-1 text-white">아임웹 Open API v3 — 사전 리서치 완료</h3>
+          <div class="grid grid-cols-4 gap-3">
+            <div><div class="text-xs font-bold" style="color:var(--c400)">회원 API</div><div class="text-xs" style="color:rgba(255,255,255,.7);font-size:12px !important">목록/상세/등급/그룹</div></div>
+            <div><div class="text-xs font-bold" style="color:var(--c400)">상품 API</div><div class="text-xs" style="color:rgba(255,255,255,.7);font-size:12px !important">목록/상세/옵션/재고</div></div>
+            <div><div class="text-xs font-bold" style="color:var(--c400)">주문 API</div><div class="text-xs" style="color:rgba(255,255,255,.7);font-size:12px !important">주문/결제/배송 상태</div></div>
+            <div><div class="text-xs font-bold" style="color:var(--c400)">프로모션 API</div><div class="text-xs" style="color:rgba(255,255,255,.7);font-size:12px !important">포인트/쿠폰/구매평</div></div>
+          </div>
+          <p class="text-xs mt-1 text-center" style="color:rgba(255,255,255,.5);font-size:11px !important">인증: OAuth 2.0 Bearer Token · Base URL: https://openapi.imweb.me · 공식 문서: developers.imweb.me</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 9: Domain/DNS -->
+<div class="slide" id="s9">
+  <div class="slide-inner" style="background:var(--light-bg);">
+    <div class="flex flex-col flex-1 px-14 pb-20 pt-10">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="section-pill" style="background:var(--c100);color:var(--c800);border:1px solid var(--c200)">2 / 8</div>
+        <span class="badge badge-critical">CRITICAL</span>
+      </div>
+      <h2 class="font-black mb-6" style="font-size:clamp(1.5rem,3vw,2.2rem);color:var(--c800);line-height:1.15;">
+        <span class="heading-line">도메인 및 DNS 이전</span>
+      </h2>
+      <div class="scroll-content">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <h3 class="text-xs font-bold mb-3" style="color:var(--c600)">핵심 질문</h3>
+            <div class="rounded-xl p-4 mb-3" style="background:#fff;border:1.5px solid var(--c200);">
+              <div class="text-xs font-bold mb-1" style="color:var(--c800)">Q1. 도메인 등록 기관</div>
+              <p class="text-xs" style="color:#374151">도메인을 아임웹에서 구매했는지, 가비아/후이즈 등 외부에서 구매했는지? <b>아임웹 구매 시 고객지원 통해 Auth Code 발급 필요</b> (1~2 영업일)</p>
+            </div>
+            <div class="rounded-xl p-4 mb-3" style="background:#fff;border:1.5px solid var(--c200);">
+              <div class="text-xs font-bold mb-1" style="color:var(--c800)">Q2. 이메일 서비스 (MX 레코드)</div>
+              <p class="text-xs" style="color:#374151">도메인 이메일(info@도메인.com 등) 사용 중인지? DNS 변경 시 <b style="color:#ef4444">이메일 수신 즉시 중단 위험</b> — MX 레코드 보존 필수</p>
+            </div>
+            <div class="rounded-xl p-4 mb-3" style="background:#fff;border:1.5px solid var(--c200);">
+              <div class="text-xs font-bold mb-1" style="color:var(--c800)">Q3. SSL 인증서 현황</div>
+              <p class="text-xs" style="color:#374151">아임웹 SSL은 이전 불가 — 새 플랫폼(AWS)에서 ACM으로 무료 재발급. 별도 인증서 구매한 것이 있는지?</p>
+            </div>
+            <div class="rounded-xl p-4 mb-3" style="background:#fff;border:1.5px solid var(--c200);">
+              <div class="text-xs font-bold mb-1" style="color:var(--c800)">Q4. 외부 채널 URL</div>
+              <p class="text-xs" style="color:#374151">네이버 쇼핑/다나와 등에 등록된 상품 URL이 있는지? URL 구조 변경 시 301 리다이렉트 매핑 필요</p>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-xs font-bold mb-3" style="color:var(--teal)">전달받을 자료</h3>
+            <div class="flex flex-wrap gap-1 mb-4">
+              <span class="doc-tag" style="background:rgba(30,58,95,.1);color:var(--c800);border-color:var(--c200)">도메인 등록기관 로그인 정보</span>
+              <span class="doc-tag" style="background:rgba(30,58,95,.1);color:var(--c800);border-color:var(--c200)">현재 DNS 레코드 목록</span>
+              <span class="doc-tag" style="background:rgba(30,58,95,.1);color:var(--c800);border-color:var(--c200)">SSL 인증서 현황</span>
+              <span class="doc-tag" style="background:rgba(30,58,95,.1);color:var(--c800);border-color:var(--c200)">도메인 만료일 정보</span>
+            </div>
+            <h3 class="text-xs font-bold mb-3" style="color:#ef4444">미확인 시 리스크</h3>
+            <div class="rounded-xl p-3 mb-2" style="background:rgba(239,68,68,.08);border:1.5px solid rgba(239,68,68,.2);">
+              <p class="text-xs" style="color:#374151"><b style="color:#ef4444">치명적:</b> DNS 변경 시 MX 레코드 초기화 → 비즈니스 이메일 수신 즉시 중단</p>
+            </div>
+            <div class="rounded-xl p-3 mb-2" style="background:rgba(239,68,68,.08);border:1.5px solid rgba(239,68,68,.2);">
+              <p class="text-xs" style="color:#374151"><b style="color:#ef4444">치명적:</b> 아임웹 구매 도메인은 셀프서비스 이전 불가 — 반드시 고객지원 요청 필요. 기관이전 중 DNS 변경 불가</p>
+            </div>
+            <div class="rounded-xl p-3 mb-2" style="background:rgba(245,158,11,.08);border:1.5px solid rgba(245,158,11,.2);">
+              <p class="text-xs" style="color:#374151"><b style="color:#f59e0b">주의:</b> 국제 도메인(.com, .net 등) 등록/이전 후 60일간 재이전 불가 (ICANN 정책)</p>
+            </div>
+            <div class="rounded-xl p-3" style="background:rgba(245,158,11,.08);border:1.5px solid rgba(245,158,11,.2);">
+              <p class="text-xs" style="color:#374151"><b style="color:#f59e0b">주의:</b> DNS 전파 시간 최대 48시간 — TTL을 사전에 짧게(300초) 설정하여 다운타임 최소화</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 10: PG Payment -->
+<div class="slide" id="s10">
+  <div class="slide-inner" style="background:linear-gradient(135deg,var(--c950) 0%,var(--c800) 100%);">
+    <div class="flex flex-col flex-1 px-14 pb-20 pt-10">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="section-pill" style="background:rgba(96,165,250,.15);color:var(--c300);border:1px solid rgba(96,165,250,.3)">3 / 8</div>
+        <span class="badge badge-critical">CRITICAL</span>
+      </div>
+      <h2 class="font-black text-white mb-5" style="font-size:clamp(1.5rem,3vw,2.2rem);line-height:1.15;">
+        <span class="heading-line">PG 결제 연동</span>
+      </h2>
+      <div class="scroll-content">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <div class="q-card">
+              <div class="flex items-center gap-2 mb-1"><span class="badge badge-critical">P0</span><span class="text-xs font-bold text-white">현재 PG사 확인</span></div>
+              <p class="text-xs" style="color:rgba(255,255,255,.6)">아임웹 연동 PG 5개 중 어떤 PG를 사용 중인지? (NHN KCP / KG이니시스 / 나이스페이 / 이지페이 / 토스페이먼츠)</p>
+            </div>
+            <div class="q-card">
+              <div class="flex items-center gap-2 mb-1"><span class="badge badge-critical">P0</span><span class="text-xs font-bold text-white">PG 계약 성격</span></div>
+              <p class="text-xs" style="color:rgba(255,255,255,.6)">아임웹 통한 계약(종속) vs PG사 직접 계약? 종속이면 독립몰용 신규 MID 발급 필요 (심사 1~2주)</p>
+            </div>
+            <div class="q-card">
+              <div class="flex items-center gap-2 mb-1"><span class="badge badge-critical">P0</span><span class="text-xs font-bold text-white">결제 수단 범위</span></div>
+              <p class="text-xs" style="color:rgba(255,255,255,.6)">카드/무통장/가상계좌 중 사용 범위? 간편결제(카카오페이/네이버페이/토스페이) 사용 여부?</p>
+            </div>
+            <div class="q-card">
+              <div class="flex items-center gap-2 mb-1"><span class="badge badge-high">P1</span><span class="text-xs font-bold text-white">정산 주기</span></div>
+              <p class="text-xs" style="color:rgba(255,255,255,.6)">현재 PG 정산 주기(D+N)? 정산 계좌 정보? 변경 시 PG사 별도 신청 필요</p>
+            </div>
+          </div>
+          <div>
+            <div class="flex flex-wrap gap-1 mb-3">
+              <span class="doc-tag">PG 계약서/MID 정보</span>
+              <span class="doc-tag">사업자등록증</span>
+              <span class="doc-tag">통신판매업 신고증</span>
+              <span class="doc-tag">아임웹 결제 설정 캡처</span>
+              <span class="doc-tag">결제수단별 거래 비중</span>
+            </div>
+            <div class="rounded-lg p-3 risk-critical mb-2">
+              <p class="text-xs" style="color:rgba(255,255,255,.8)"><b>PG 심사 1~2주</b> — 14일 일정의 최대 병목. 미팅 직후 심사 접수 필요</p>
+            </div>
+            <div class="rounded-lg p-3 risk-critical mb-2">
+              <p class="text-xs" style="color:rgba(255,255,255,.8)"><b>네이버페이 빠른결제 / 카카오 체크아웃은 이전 불가</b> — 새 플랫폼에서 반드시 신규 신청해야 함</p>
+            </div>
+            <div class="rounded-lg p-3 risk-high mb-2">
+              <p class="text-xs" style="color:rgba(255,255,255,.8)"><b>에스크로/구매안전서비스</b> — 전자상거래법상 의무. 아임웹 자동 적용이었다면 독립몰에서 별도 가입 필요</p>
+            </div>
+            <!-- PG 비교표 -->
+            <div class="rounded-xl overflow-hidden mt-3" style="border:1px solid rgba(255,255,255,.2);">
+              <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                <thead>
+                  <tr style="background:rgba(255,255,255,.1);">
+                    <th style="padding:6px 8px;text-align:left;color:#fff;width:35%">PG사</th>
+                    <th style="padding:6px 8px;text-align:center;color:#fff;width:30%">기존 MID 추가 발급</th>
+                    <th style="padding:6px 8px;text-align:center;color:#fff;width:35%">비고</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-bottom:1px solid rgba(255,255,255,.1);"><td style="padding:5px 8px;color:rgba(255,255,255,.8)">KG이니시스</td><td style="padding:5px 8px;text-align:center;color:#4ade80;font-weight:700">가능</td><td style="padding:5px 8px;color:rgba(255,255,255,.6)">추가 발급 신청</td></tr>
+                  <tr style="border-bottom:1px solid rgba(255,255,255,.1);"><td style="padding:5px 8px;color:rgba(255,255,255,.8)">토스페이먼츠</td><td style="padding:5px 8px;text-align:center;color:#4ade80;font-weight:700">가능</td><td style="padding:5px 8px;color:rgba(255,255,255,.6)">기존 가맹점 ID 활용</td></tr>
+                  <tr style="border-bottom:1px solid rgba(255,255,255,.1);"><td style="padding:5px 8px;color:rgba(255,255,255,.8)">NHN KCP</td><td style="padding:5px 8px;text-align:center;color:#fbbf24;font-weight:700">확인 필요</td><td style="padding:5px 8px;color:rgba(255,255,255,.6)">계약 형태에 따라 상이</td></tr>
+                  <tr style="border-bottom:1px solid rgba(255,255,255,.1);"><td style="padding:5px 8px;color:rgba(255,255,255,.8)">나이스페이</td><td style="padding:5px 8px;text-align:center;color:#fbbf24;font-weight:700">확인 필요</td><td style="padding:5px 8px;color:rgba(255,255,255,.6)">계약 형태에 따라 상이</td></tr>
+                  <tr><td style="padding:5px 8px;color:rgba(255,255,255,.8)">네이버페이/카카오</td><td style="padding:5px 8px;text-align:center;color:#f87171;font-weight:700">불가</td><td style="padding:5px 8px;color:rgba(255,255,255,.6)">신규 신청 필수</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 11: Product Data / Images -->
+<div class="slide" id="s11">
+  <div class="slide-inner" style="background:var(--light-bg);">
+    <div class="flex flex-col flex-1 px-14 pb-20 pt-10">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="section-pill" style="background:var(--c100);color:var(--c800);border:1px solid var(--c200)">4 / 8</div>
+        <span class="badge badge-critical">CRITICAL</span>
+      </div>
+      <h2 class="font-black mb-5" style="font-size:clamp(1.5rem,3vw,2.2rem);color:var(--c800);line-height:1.15;">
+        <span class="heading-line">상품 데이터 / 이미지 이관</span>
+      </h2>
+      <div class="scroll-content">
+        <div class="grid grid-cols-3 gap-4">
+          <div class="rounded-xl p-4" style="background:#fff;border:1.5px solid var(--c200);">
+            <div class="text-xl mb-2">📊</div>
+            <h3 class="font-bold text-xs mb-2" style="color:var(--c800)">상품 데이터 파악</h3>
+            <ul class="text-xs space-y-1" style="color:#374151">
+              <li>• 총 상품 수? (이관 규모 파악)</li>
+              <li>• 옵션 구조 (독립형/조합형)?</li>
+              <li>• 카테고리 depth?</li>
+              <li>• 상세페이지 형식 (통이미지/HTML)?</li>
+              <li>• 상품정보 제공고시 항목?</li>
+            </ul>
+          </div>
+          <div class="rounded-xl p-4" style="background:#fff;border:1.5px solid var(--c200);">
+            <div class="text-xl mb-2">🖼️</div>
+            <h3 class="font-bold text-xs mb-2" style="color:var(--c800)">이미지 이관 전략</h3>
+            <ul class="text-xs space-y-1" style="color:#374151">
+              <li>• 아임웹 CDN URL 구조:<br><code style="font-size:10px;background:#f3f4f6;padding:2px 4px;border-radius:3px">cdn.imweb.me/upload/{사이트ID}/{파일ID}</code></li>
+              <li>• <b style="color:#ef4444">백업에 이미지 미포함</b></li>
+              <li>• API로 URL 추출 → 스크립트 자동 다운로드</li>
+              <li>• S3 + CloudFront로 이관</li>
+              <li>• 권장 크기: 750x750px</li>
+            </ul>
+          </div>
+          <div class="rounded-xl p-4" style="background:var(--c800);border:1.5px solid var(--c700);">
+            <div class="text-xl mb-2">📦</div>
+            <h3 class="font-bold text-xs mb-2 text-white">재고 관리 확인</h3>
+            <ul class="text-xs space-y-1" style="color:var(--c300)">
+              <li>• 아임웹 재고 관리 사용 중?</li>
+              <li>• 재고 수량 동기화 필요?</li>
+              <li>• ERP/WMS 연동 여부?</li>
+              <li>• 품절 시 처리 정책?</li>
+              <li>→ 이 답변이 DB 스키마 설계에 직접 영향</li>
+            </ul>
+          </div>
+        </div>
+        <div class="mt-3 rounded-xl p-3" style="background:rgba(239,68,68,.08);border:1.5px solid rgba(239,68,68,.2);">
+          <p class="text-xs" style="color:#374151"><b style="color:#ef4444">핵심:</b> 아임웹은 상품 이미지를 데이터 백업에 포함하지 않습니다. 반드시 이관 완료 전까지 아임웹을 유지해야 CDN에서 이미지를 추출할 수 있습니다.</p>
+        </div>
+        <!-- Export 방법 비교 -->
+        <div class="mt-3 rounded-xl overflow-hidden" style="border:1.5px solid var(--c200);">
+          <div class="px-4 py-2" style="background:var(--c800);">
+            <h3 class="text-xs font-bold text-white">아임웹 데이터 추출 방법 비교</h3>
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-size:12px;">
+            <thead>
+              <tr style="background:var(--c100);">
+                <th style="padding:7px 10px;text-align:left;color:var(--c800);width:25%">방법</th>
+                <th style="padding:7px 10px;text-align:center;color:var(--c800);width:25%">Open API v3</th>
+                <th style="padding:7px 10px;text-align:center;color:var(--c800);width:25%">관리자 Excel Export</th>
+                <th style="padding:7px 10px;text-align:center;color:var(--c800);width:25%">권장</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--c200);"><td style="padding:6px 10px;color:var(--dark);font-weight:600">회원 데이터</td><td style="padding:6px 10px;color:#374151;text-align:center">전체 필드 조회 가능</td><td style="padding:6px 10px;color:#374151;text-align:center">기본 필드만</td><td style="padding:6px 10px;text-align:center;font-weight:700;color:#22c55e">API 우선</td></tr>
+              <tr style="border-bottom:1px solid var(--c200);background:var(--c50);"><td style="padding:6px 10px;color:var(--dark);font-weight:600">상품 데이터</td><td style="padding:6px 10px;color:#374151;text-align:center">옵션/이미지 URL 포함</td><td style="padding:6px 10px;color:#374151;text-align:center">기본 정보만</td><td style="padding:6px 10px;text-align:center;font-weight:700;color:#22c55e">API 우선</td></tr>
+              <tr style="border-bottom:1px solid var(--c200);"><td style="padding:6px 10px;color:var(--dark);font-weight:600">주문 데이터</td><td style="padding:6px 10px;color:#374151;text-align:center">전체 주문 상세</td><td style="padding:6px 10px;color:#374151;text-align:center">양식 커스텀 가능</td><td style="padding:6px 10px;text-align:center;font-weight:700;color:#22c55e">API + Excel 병행</td></tr>
+              <tr><td style="padding:6px 10px;color:var(--dark);font-weight:600">이미지</td><td style="padding:6px 10px;color:#374151;text-align:center">URL 추출 → 스크립트</td><td style="padding:6px 10px;color:#374151;text-align:center">미포함</td><td style="padding:6px 10px;text-align:center;font-weight:700;color:#22c55e">API 필수</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 12: Member Data -->
+<div class="slide" id="s12">
+  <div class="slide-inner" style="background:linear-gradient(135deg,var(--c950) 0%,var(--c800) 100%);">
+    <div class="flex flex-col flex-1 px-14 pb-20 pt-10">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="section-pill" style="background:rgba(96,165,250,.15);color:var(--c300);border:1px solid rgba(96,165,250,.3)">5 / 8</div>
+        <span class="badge badge-critical">CRITICAL</span>
+      </div>
+      <h2 class="font-black text-white mb-5" style="font-size:clamp(1.5rem,3vw,2.2rem);line-height:1.15;">
+        <span class="heading-line">회원 데이터 이관</span>
+      </h2>
+      <div class="scroll-content">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <div class="q-card">
+              <div class="flex items-center gap-2 mb-1"><span class="badge badge-critical">P0</span><span class="text-xs font-bold text-white">총 회원 수</span></div>
+              <p class="text-xs" style="color:rgba(255,255,255,.6)">현재 가입 회원 수? 활성 회원 비율? → 이관 볼륨 및 DB 용량 산정에 필요</p>
+            </div>
+            <div class="q-card">
+              <div class="flex items-center gap-2 mb-1"><span class="badge badge-critical">P0</span><span class="text-xs font-bold text-white">비밀번호 재설정 안내 방법</span></div>
+              <p class="text-xs" style="color:rgba(255,255,255,.6)">비밀번호는 암호화되어 <b>이전 불가</b>. 이관 후 회원에게 비밀번호 재설정 안내 이메일/SMS 발송 필요. 발송 방법 협의 (카카오 알림톡 vs 이메일 vs SMS)</p>
+            </div>
+            <div class="q-card">
+              <div class="flex items-center gap-2 mb-1"><span class="badge badge-high">P1</span><span class="text-xs font-bold text-white">쇼핑 등급/포인트 사용 여부</span></div>
+              <p class="text-xs" style="color:rgba(255,255,255,.6)">회원 등급 체계가 있는지? 적립금/포인트 잔액 이관 필요? API로 포인트 거래 내역까지 추출 가능</p>
+            </div>
+            <div class="q-card">
+              <div class="flex items-center gap-2 mb-1"><span class="badge badge-high">P1</span><span class="text-xs font-bold text-white">로그인 방식</span></div>
+              <p class="text-xs" style="color:rgba(255,255,255,.6)">이메일 로그인? 소셜 로그인(카카오/네이버/구글)? 아이디 로그인? → 새 시스템 인증 구조 설계에 영향</p>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-xs font-bold mb-3" style="color:var(--teal)">이관 가능/불가 항목</h3>
+            <div class="space-y-2 mb-4">
+              <div class="flex items-center gap-2 text-xs" style="color:rgba(255,255,255,.8)"><span style="color:#4ade80">&#10003;</span> 이메일, 이름, 전화번호, 주소</div>
+              <div class="flex items-center gap-2 text-xs" style="color:rgba(255,255,255,.8)"><span style="color:#4ade80">&#10003;</span> 쇼핑 등급, 회원 그룹</div>
+              <div class="flex items-center gap-2 text-xs" style="color:rgba(255,255,255,.8)"><span style="color:#4ade80">&#10003;</span> 적립금/포인트 잔액</div>
+              <div class="flex items-center gap-2 text-xs" style="color:rgba(255,255,255,.8)"><span style="color:#4ade80">&#10003;</span> 동의 정보 (개인정보/마케팅)</div>
+              <div class="flex items-center gap-2 text-xs" style="color:rgba(255,255,255,.8)"><span style="color:#4ade80">&#10003;</span> 위시리스트, 장바구니 (API)</div>
+              <div class="flex items-center gap-2 text-xs" style="color:rgba(255,255,255,.8)"><span style="color:#f87171">&#10007;</span> <b>비밀번호 (암호화 — 이전 불가)</b></div>
+              <div class="flex items-center gap-2 text-xs" style="color:rgba(255,255,255,.8)"><span style="color:#f87171">&#10007;</span> <b>사용자 정의 필드 (일괄 내보내기 미지원)</b></div>
+              <div class="flex items-center gap-2 text-xs" style="color:rgba(255,255,255,.8)"><span style="color:#f87171">&#10007;</span> <b>회원 첨부 이미지/파일 (백업 미포함)</b></div>
+            </div>
+            <div class="rounded-lg p-3 risk-critical mb-2">
+              <p class="text-xs" style="color:rgba(255,255,255,.8)"><b>비밀번호 재설정 안내 미발송</b> 시 회원 로그인 불가 → 이탈 위험. 이관 후 즉시 안내 발송 필수</p>
+            </div>
+            <div class="rounded-lg p-3 risk-high">
+              <p class="text-xs" style="color:rgba(255,255,255,.8)"><b>사용자 정의 필드</b>가 있을 경우 일괄 내보내기 불가 — API로 개별 회원 조회하여 추출해야 함 (대량이면 시간 소요)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 13: Operations (Delivery / Design / Notification) -->
+<div class="slide" id="s13">
+  <div class="slide-inner" style="background:var(--light-bg);">
+    <div class="flex flex-col flex-1 px-14 pb-20 pt-10">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="section-pill" style="background:var(--c100);color:var(--c800);border:1px solid var(--c200)">6~8 / 8</div>
+      </div>
+      <h2 class="font-black mb-5" style="font-size:clamp(1.5rem,3vw,2.2rem);color:var(--c800);line-height:1.15;">
+        <span class="heading-line">운영 인프라 — 배송 · 디자인 · 알림</span>
+      </h2>
+      <div class="scroll-content">
+        <div class="grid grid-cols-3 gap-4">
+          <!-- Delivery -->
+          <div class="rounded-xl p-4" style="background:#fff;border:1.5px solid var(--c200);">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-lg">🚚</span>
+              <span class="text-xs font-bold" style="color:var(--c800)">배송/물류</span>
+              <span class="badge badge-high">HIGH</span>
+            </div>
+            <ul class="text-xs space-y-1" style="color:#374151">
+              <li>• 택배사: <b style="color:var(--c600)">로젠택배 사용 확인됨</b></li>
+              <li>• 로젠 API 연동 범위: <b>추적만 vs 접수+추적</b>?</li>
+              <li>• 배송비 정책: 무료배송/조건부/고정?</li>
+              <li>• 반품/교환: v1에 포함 vs v2 이후?</li>
+              <li>• 출고지: 단일 vs 복수?</li>
+              <li>• 송장 입력 방식: 수동/대량 업로드?</li>
+            </ul>
+          </div>
+          <!-- Design -->
+          <div class="rounded-xl p-4" style="background:#fff;border:1.5px solid var(--c200);">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-lg">🎨</span>
+              <span class="text-xs font-bold" style="color:var(--c800)">디자인</span>
+              <span class="badge badge-medium">MEDIUM</span>
+            </div>
+            <ul class="text-xs space-y-1" style="color:#374151">
+              <li>• 발주서에 <b>"디자인 크게 중요하지 않음"</b></li>
+              <li>• 기존 아임웹 디자인 유지? 새로 제작?</li>
+              <li>• 디자인 레퍼런스 없음 → <b>벤치마킹 사이트</b> 3개 요청</li>
+              <li>• 로고/브랜드 컬러 파일 보유?</li>
+              <li>• 아임웹 템플릿/디자인 이전 불가</li>
+            </ul>
+          </div>
+          <!-- Notification -->
+          <div class="rounded-xl p-4" style="background:#fff;border:1.5px solid var(--c200);">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-lg">💬</span>
+              <span class="text-xs font-bold" style="color:var(--c800)">알림톡/SMS</span>
+              <span class="badge badge-medium">MEDIUM</span>
+            </div>
+            <ul class="text-xs space-y-1" style="color:#374151">
+              <li>• 카카오 비즈니스 채널 보유?</li>
+              <li>• 알림 시나리오: 주문확인/배송 등</li>
+              <li>• SMS 발신번호 등록 현황</li>
+              <li>• 마케팅 동의 회원 이관 범위</li>
+              <li>• 월 발송 건수 (비용 산정)</li>
+              <li>• 카카오 알림톡: 기존 계정 재사용 가능</li>
+            </ul>
+          </div>
+        </div>
+        <!-- Admin Scope -->
+        <div class="mt-3 rounded-xl p-3" style="background:rgba(96,165,250,.08);border:1.5px solid rgba(96,165,250,.2);">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-lg">⚙️</span>
+            <span class="text-xs font-bold" style="color:var(--c800)">관리자(어드민) 페이지 범위 확인</span>
+            <span class="badge badge-critical">CRITICAL</span>
+          </div>
+          <p class="text-xs" style="color:#374151">어드민 기능 범위에 따라 공수가 크게 달라짐 — 미팅에서 반드시 확인</p>
+          <ul class="text-xs space-y-1 mt-1" style="color:#374151">
+            <li>• <b>상품 관리</b>: 등록/수정/삭제/옵션/재고 — 어느 수준까지?</li>
+            <li>• <b>주문 관리</b>: 주문목록/상태변경/송장입력/취소·환불 처리</li>
+            <li>• <b>회원 관리</b>: 회원목록/등급/적립금/메모</li>
+            <li>• <b>통계/대시보드</b>: 매출현황/상품별 통계 필요?</li>
+            <li>• <b>기타</b>: 배너관리/공지사항/팝업/쿠폰 발행?</li>
+          </ul>
+        </div>
+        <div class="mt-2 rounded-xl p-3" style="background:rgba(245,158,11,.08);border:1.5px solid rgba(245,158,11,.2);">
+          <p class="text-xs" style="color:#374151"><b style="color:#f59e0b">참고:</b> 발주서에 "디자인 크게 중요하지 않음"으로 명시됨. 기능 완성도에 집중하되, 벤치마킹 사이트 3개를 미팅 전 요청하면 디자인 논의 시간을 절약할 수 있습니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 14: Priority Matrix -->
+<div class="slide" id="s14">
+  <div class="slide-inner" style="background:linear-gradient(135deg,var(--c950) 0%,var(--c800) 100%);">
+    <div class="flex flex-col flex-1 px-14 pb-20 pt-10">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="section-pill" style="background:rgba(96,165,250,.15);color:var(--c300);border:1px solid rgba(96,165,250,.3)">PRIORITY MATRIX</div>
+      </div>
+      <h2 class="font-black text-white mb-5" style="font-size:clamp(1.5rem,3vw,2.2rem);line-height:1.15;">
+        <span class="heading-line">미팅 우선순위 매트릭스 TOP 8</span>
+      </h2>
+      <div class="scroll-content">
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead>
+            <tr style="background:rgba(255,255,255,.1);">
+              <th style="padding:8px 10px;text-align:left;color:#fff;width:5%">#</th>
+              <th style="padding:8px 10px;text-align:left;color:#fff;width:25%">확인 항목</th>
+              <th style="padding:8px 10px;text-align:left;color:#fff;width:8%">리스크</th>
+              <th style="padding:8px 10px;text-align:left;color:#fff;width:32%">미확정 시 영향</th>
+              <th style="padding:8px 10px;text-align:left;color:#fff;width:15%">리드타임</th>
+              <th style="padding:8px 10px;text-align:left;color:#fff;width:15%">착수 차단?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.1);">
+              <td style="padding:7px 10px;color:#fff">1</td>
+              <td style="padding:7px 10px;font-weight:600;color:#fff">PG 계약 성격 (종속 여부)</td>
+              <td style="padding:7px 10px"><span class="badge badge-critical">Critical</span></td>
+              <td style="padding:7px 10px;color:rgba(255,255,255,.7)">신규 PG 심사 1~2주 대기</td>
+              <td style="padding:7px 10px;color:rgba(255,255,255,.7)">영업일 10일</td>
+              <td style="padding:7px 10px;color:#ef4444;font-weight:700">YES</td>
+            </tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);">
+              <td style="padding:7px 10px;color:#fff">2</td>
+              <td style="padding:7px 10px;font-weight:600;color:#fff">아임웹 API 접근 (OAuth 앱)</td>
+              <td style="padding:7px 10px"><span class="badge badge-critical">Critical</span></td>
+              <td style="padding:7px 10px;color:rgba(255,255,255,.7)">데이터 추출 불가, 수동 Excel만 가능</td>
+              <td style="padding:7px 10px;color:rgba(255,255,255,.7)">즉시 결정</td>
+              <td style="padding:7px 10px;color:#ef4444;font-weight:700">YES</td>
+            </tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.1);">
+              <td style="padding:7px 10px;color:#fff">3</td>
+              <td style="padding:7px 10px;font-weight:600;color:#fff">도메인 등록기관 확인</td>
+              <td style="padding:7px 10px"><span class="badge badge-critical">Critical</span></td>
+              <td style="padding:7px 10px;color:rgba(255,255,255,.7)">Auth Code 발급 1~2일 + 이전 완료 수일</td>
+              <td style="padding:7px 10px;color:rgba(255,255,255,.7)">영업일 5일</td>
+              <td style="padding:7px 10px;color:#f59e0b;font-weight:700">PARTIAL</td>
+            </tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);">
+              <td style="padding:7px 10px;color:#fff">4</td>
+              <td style="padding:7px 10px;font-weight:600;color:#fff">이미지 원본 보유 여부</td>
+              <td style="padding:7px 10px"><span class="badge badge-critical">Critical</span></td>
+              <td style="padding:7px 10px;color:rgba(255,255,255,.7)">CDN에서 자동 추출 스크립트 필요 (추가 공수)</td>
+              <td style="padding:7px 10px;color:rgba(255,255,255,.7)">즉시 확인</td>
+              <td style="padding:7px 10px;color:#f59e0b;font-weight:700">PARTIAL</td>
+            </tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.1);">
+              <td style="padding:7px 10px;color:#fff">5</td>
+              <td style="padding:7px 10px;font-weight:600;color:#fff">회원 수/상품 수 (이관 규모)</td>
+              <td style="padding:7px 10px"><span class="badge badge-high">High</span></td>
+              <td style="padding:7px 10px;color:rgba(255,255,255,.7)">DB 스키마 설계 및 이관 소요 시간 산정 불가</td>
+              <td style="padding:7px 10px;color:rgba(255,255,255,.7)">즉시 확인</td>
+              <td style="padding:7px 10px;color:#f59e0b;font-weight:700">PARTIAL</td>
+            </tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);">
+              <td style="padding:7px 10px;color:#fff">6</td>
+              <td style="padding:7px 10px;font-weight:600;color:#fff">비밀번호 재설정 안내 방법</td>
+              <td style="padding:7px 10px"><span class="badge badge-high">High</span></td>
+              <td style="padding:7px 10px;color:rgba(255,255,255,.7)">회원 로그인 불가 → 이탈 위험</td>
+              <td style="padding:7px 10px;color:rgba(255,255,255,.7)">즉시 결정</td>
+              <td style="padding:7px 10px;color:#22c55e;font-weight:700">NO</td>
+            </tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.1);">
+              <td style="padding:7px 10px;color:#fff">7</td>
+              <td style="padding:7px 10px;font-weight:600;color:#fff">배송 API 연동 범위</td>
+              <td style="padding:7px 10px"><span class="badge badge-high">High</span></td>
+              <td style="padding:7px 10px;color:rgba(255,255,255,.7)">추적만 vs 접수+추적 — 공수 6~10배 차이</td>
+              <td style="padding:7px 10px;color:rgba(255,255,255,.7)">영업일 10일</td>
+              <td style="padding:7px 10px;color:#22c55e;font-weight:700">NO</td>
+            </tr>
+            <tr>
+              <td style="padding:7px 10px;color:#fff">8</td>
+              <td style="padding:7px 10px;font-weight:600;color:#fff">반품/교환 프로세스 포함 여부</td>
+              <td style="padding:7px 10px"><span class="badge badge-high">High</span></td>
+              <td style="padding:7px 10px;color:rgba(255,255,255,.7)">주문 상태 머신 복잡도 2~3배</td>
+              <td style="padding:7px 10px;color:rgba(255,255,255,.7)">즉시 결정</td>
+              <td style="padding:7px 10px;color:#22c55e;font-weight:700">NO</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 15: Required Documents Checklist -->
+<div class="slide" id="s15">
+  <div class="slide-inner" style="background:var(--light-bg);">
+    <div class="flex flex-col flex-1 px-14 pb-20 pt-10">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="section-pill" style="background:var(--c100);color:var(--c800);border:1px solid var(--c200)">DOCUMENTS</div>
+      </div>
+      <h2 class="font-black mb-5" style="font-size:clamp(1.5rem,3vw,2.2rem);color:var(--c800);line-height:1.15;">
+        <span class="heading-line">클라이언트 전달 자료 체크리스트</span>
+      </h2>
+      <div class="scroll-content">
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <h3 class="text-xs font-bold mb-3" style="color:#ef4444">🔴 계약 즉시 (D+0)</h3>
+            <div class="space-y-1.5 mb-4">
+              <div class="flex items-center gap-2 text-xs" style="color:#374151">☐ 사업자등록증</div>
+              <div class="flex items-center gap-2 text-xs" style="color:#374151">☐ 통신판매업 신고증</div>
+              <div class="flex items-center gap-2 text-xs" style="color:#374151">☐ 아임웹 관리자 로그인 정보</div>
+              <div class="flex items-center gap-2 text-xs" style="color:#374151">☐ PG 계약서 / MID 정보</div>
+              <div class="flex items-center gap-2 text-xs" style="color:#374151">☐ 대표자 신분증 사본 (PG 심사용)</div>
+              <div class="flex items-center gap-2 text-xs" style="color:#374151">☐ 정산 계좌 통장 사본</div>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-xs font-bold mb-3" style="color:#f59e0b">🟡 3일 이내 (D+3)</h3>
+            <div class="space-y-1.5 mb-4">
+              <div class="flex items-center gap-2 text-xs" style="color:#374151">☐ 상품 목록 Excel (가격/재고)</div>
+              <div class="flex items-center gap-2 text-xs" style="color:#374151">☐ 회원 목록 Excel</div>
+              <div class="flex items-center gap-2 text-xs" style="color:#374151">☐ 도메인 등록기관 접속 정보</div>
+              <div class="flex items-center gap-2 text-xs" style="color:#374151">☐ DNS 레코드 전체 목록</div>
+              <div class="flex items-center gap-2 text-xs" style="color:#374151">☐ 배송비 정책 정리</div>
+              <div class="flex items-center gap-2 text-xs" style="color:#374151">☐ 택배사 계약 정보</div>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-xs font-bold mb-3" style="color:var(--c600)">🔵 1주 이내 (D+7)</h3>
+            <div class="space-y-1.5 mb-4">
+              <div class="flex items-center gap-2 text-xs" style="color:#374151">☐ 로고 파일 (AI/SVG/PNG)</div>
+              <div class="flex items-center gap-2 text-xs" style="color:#374151">☐ 브랜드 컬러/폰트 정보</div>
+              <div class="flex items-center gap-2 text-xs" style="color:#374151">☐ 벤치마킹 사이트 URL 3개</div>
+              <div class="flex items-center gap-2 text-xs" style="color:#374151">☐ 상품 이미지 원본 (있을 경우)</div>
+              <div class="flex items-center gap-2 text-xs" style="color:#374151">☐ 카카오 비즈니스 채널 정보</div>
+              <div class="flex items-center gap-2 text-xs" style="color:#374151">☐ SMS 발신번호 정보</div>
+            </div>
+          </div>
+        </div>
+        <div class="rounded-xl p-4 mt-3" style="background:var(--c800);">
+          <h3 class="text-xs font-bold mb-2 text-white">💡 미팅 전 사전 요청 항목</h3>
+          <p class="text-xs" style="color:var(--c300)">미팅 효율을 위해 <b>아임웹 결제 설정 캡처</b>, <b>회원 수</b>, <b>상품 수</b>를 미팅 전 메일로 사전 요청하면 미팅 시간을 의사결정에 집중할 수 있습니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 16: Next Steps -->
+<div class="slide" id="s17">
+  <div class="slide-inner" style="background:linear-gradient(145deg,var(--c950) 0%,var(--c800) 55%,var(--c900) 100%);">
+    <div class="flex flex-col items-center justify-center flex-1 text-center px-8">
+      <div class="text-5xl mb-6" style="filter:drop-shadow(0 0 24px rgba(96,165,250,0.4))">🚀</div>
+      <h2 class="font-black text-white mb-6" style="font-size:clamp(1.8rem,4vw,3rem);line-height:1.15;">
+        미팅 후 즉시 실행 항목
+      </h2>
+      <div class="grid grid-cols-3 gap-5 mb-8" style="max-width:800px;">
+        <div class="rounded-2xl p-5 text-left" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);">
+          <div class="text-xs font-bold mb-2" style="color:#f87171">D+0 (당일)</div>
+          <ul class="text-xs space-y-1.5" style="color:rgba(255,255,255,.75)">
+            <li>• PG 심사 서류 접수</li>
+            <li>• 아임웹 Open API 앱 등록</li>
+            <li>• AWS 계정 생성</li>
+            <li>• 도메인 WHOIS 조회</li>
+          </ul>
+        </div>
+        <div class="rounded-2xl p-5 text-left" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);">
+          <div class="text-xs font-bold mb-2" style="color:#fbbf24">D+1~3 (설계)</div>
+          <ul class="text-xs space-y-1.5" style="color:rgba(255,255,255,.75)">
+            <li>• API로 데이터 추출 시작</li>
+            <li>• 이미지 CDN 자동 수집</li>
+            <li>• DB 스키마 설계</li>
+            <li>• 와이어프레임 작성</li>
+          </ul>
+        </div>
+        <div class="rounded-2xl p-5 text-left" style="background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3);">
+          <div class="text-xs font-bold mb-2" style="color:var(--c300)">D+4~14 (개발/이관)</div>
+          <ul class="text-xs space-y-1.5" style="color:rgba(255,255,255,.75)">
+            <li>• 프론트엔드 + 백엔드 개발</li>
+            <li>• PG 결제 연동</li>
+            <li>• 데이터 이관 실행</li>
+            <li>• QA → DNS 전환 → 오픈</li>
+          </ul>
+        </div>
+      </div>
+      <div class="rounded-xl p-4 mb-6" style="background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.3);max-width:700px;">
+        <p class="text-sm text-center" style="color:rgba(255,255,255,.8)">
+          <b style="color:#5eead4">4월 중순 프로젝트 완료</b> 목표 — 14일 개발 + 6개월 무상 하자보수
+        </p>
+      </div>
+      <div class="h-px w-48 mb-6" style="background:linear-gradient(90deg,transparent,var(--c400),transparent)"></div>
+      <p class="text-sm" style="color:rgba(255,255,255,.45);">원클릭사이트제작 · 계약 미팅 체크리스트 · 2026</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<!-- Navigation -->
+<div id="nav">
+  <button class="nav-btn" onclick="go(-1)" aria-label="Previous">&#8592;</button>
+  <span id="counter">1 / 16</span>
+  <button class="nav-btn" onclick="go(1)" aria-label="Next">&#8594;</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let cur = 0;
+  const bar = document.getElementById('progress-bar');
+  const counter = document.getElementById('counter');
+
+  function show(n) {
+    slides.forEach((s, i) => {
+      s.classList.remove('active', 'prev');
+      if (i === n) s.classList.add('active');
+      else if (i < n) s.classList.add('prev');
+    });
+    bar.style.width = ((n + 1) / slides.length * 100) + '%';
+    counter.textContent = (n + 1) + ' / ' + slides.length;
+  }
+
+  function go(d) {
+    cur = Math.max(0, Math.min(slides.length - 1, cur + d));
+    show(cur);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+  });
+
+  let touchX = 0;
+  document.addEventListener('touchstart', e => touchX = e.touches[0].clientX);
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
+  });
+
+  show(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>더본투비 - DHLUX | 전자담배 전문 쇼핑몰</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    * { font-family: 'Noto Sans KR', sans-serif; }
+
+    /* Cloud Demo Badge */
+    .cloud-demo-badge {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 9999;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      padding: 4px 12px 4px 8px;
+      clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%);
+      text-transform: uppercase;
+    }
+
+    /* Hero slider */
+    .hero-slider { position: relative; overflow: hidden; }
+    .slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.8s ease-in-out; }
+    .slide.active { opacity: 1; }
+    .slide img { width: 100%; height: 100%; object-fit: cover; }
+
+    .slider-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .slider-dot.active {
+      background: white;
+      transform: scale(1.3);
+    }
+
+    /* Product cards */
+    .product-card {
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      cursor: pointer;
+    }
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.13);
+    }
+    .product-card:hover .card-overlay {
+      opacity: 1;
+    }
+    .card-overlay {
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    /* Badge pill */
+    .badge-sale   { background: #e53e3e; }
+    .badge-best   { background: #d69e2e; }
+    .badge-hot    { background: #dd6b20; }
+    .badge-new    { background: #38a169; }
+    .badge-soldout{ background: #718096; }
+    .badge-md     { background: #805ad5; }
+
+    /* Navigation underline effect */
+    .nav-link { position: relative; }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px; left: 0; right: 0;
+      height: 2px;
+      background: #1a1a2e;
+      transform: scaleX(0);
+      transition: transform 0.2s;
+    }
+    .nav-link:hover::after { transform: scaleX(1); }
+
+    /* Search focus ring */
+    .search-input:focus { outline: none; box-shadow: 0 0 0 2px #1a1a2e; }
+
+    /* Category card hover */
+    .cat-card { transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+    .cat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+
+    /* Kakao button */
+    .kakao-btn {
+      background: #FEE500;
+      color: #3A1D1D;
+      transition: filter 0.2s;
+    }
+    .kakao-btn:hover { filter: brightness(0.92); }
+
+    /* Scroll bar custom */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+
+    /* Mobile menu */
+    .mobile-menu {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease;
+    }
+    .mobile-menu.open { max-height: 400px; }
+
+    /* Announcement ticker */
+    .ticker-wrap { overflow: hidden; }
+    .ticker-content {
+      display: inline-block;
+      white-space: nowrap;
+      animation: ticker 28s linear infinite;
+    }
+    @keyframes ticker {
+      0%   { transform: translateX(100vw); }
+      100% { transform: translateX(-100%); }
+    }
+
+    /* Form input focus */
+    .form-input:focus {
+      outline: none;
+      border-color: #1a1a2e;
+      box-shadow: 0 0 0 2px rgba(26,26,46,0.15);
+    }
+
+    /* Delivery badge */
+    .delivery-badge {
+      border: 2px solid #c53030;
+      border-radius: 4px;
+      padding: 2px 6px;
+    }
+
+    /* Section header line */
+    .section-title-line {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .section-title-line::before,
+    .section-title-line::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e2e8f0;
+    }
+
+    /* ===== Product Detail Overlay ===== */
+    #productDetailOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9000;
+      background: white;
+      overflow-y: auto;
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    #productDetailOverlay.open {
+      transform: translateY(0);
+    }
+
+    /* ===== Cart Drawer ===== */
+    #cartDrawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 380px;
+      max-width: 100vw;
+      z-index: 9100;
+      background: white;
+      box-shadow: -4px 0 24px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    #cartDrawer.open {
+      transform: translateX(0);
+    }
+    #cartDrawerBackdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 9050;
+      background: rgba(0,0,0,0.4);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    #cartDrawerBackdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Detail tab active */
+    .detail-tab { cursor: pointer; border-bottom: 2px solid transparent; transition: border-color 0.2s, color 0.2s; }
+    .detail-tab.active { border-bottom-color: #1a1a2e; color: #1a1a2e; font-weight: 700; }
+
+    /* Qty selector */
+    .qty-btn {
+      width: 32px; height: 32px;
+      border: 1px solid #d1d5db;
+      background: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; cursor: pointer; user-select: none;
+      transition: background 0.15s;
+    }
+    .qty-btn:hover { background: #f3f4f6; }
+    .qty-display {
+      width: 48px; height: 32px;
+      border-top: 1px solid #d1d5db;
+      border-bottom: 1px solid #d1d5db;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 600;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- CLOUD DEMO Badge -->
+  <div class="cloud-demo-badge">&#9729; CLOUD DEMO</div>
+
+  <!-- ===== TOP BAR ===== -->
+  <div class="bg-gray-900 text-gray-300 text-xs py-1.5">
+    <div class="max-w-screen-xl mx-auto px-4 flex justify-between items-center">
+      <!-- Left: announcement ticker -->
+      <div class="ticker-wrap flex-1 mr-8 hidden md:block">
+        <span class="ticker-content text-gray-400">
+          &nbsp;&nbsp;&nbsp;&nbsp;전자담배 전문 쇼핑몰 더본투비 &nbsp;|&nbsp; 당일 오후 2시 이전 결제 시 당일 발송 &nbsp;|&nbsp; 우체국 택배 / 로젠택배 &nbsp;|&nbsp; 고객센터 010-8514-2001 &nbsp;&nbsp;&nbsp;&nbsp;
+        </span>
+      </div>
+      <!-- Right: user links -->
+      <div class="flex items-center gap-4 ml-auto">
+        <a href="#" class="hover:text-white transition-colors flex items-center gap-1">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          마이페이지
+        </a>
+        <a href="#" class="hover:text-white transition-colors flex items-center gap-1">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+          관심상품
+        </a>
+        <a href="#" class="hover:text-white transition-colors flex items-center gap-1">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          장바구니
+        </a>
+        <span class="text-gray-500">|</span>
+        <span class="text-gray-400">홍길동님</span>
+        <a href="#" class="hover:text-white transition-colors">로그아웃</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN HEADER ===== -->
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-screen-xl mx-auto px-4 py-3 flex items-center gap-6">
+
+      <!-- Logo -->
+      <a href="#" class="flex-shrink-0 flex items-center gap-2">
+        <img src="https://cdn.imweb.me/thumbnail/20230314/f896897ec6166.png"
+             alt="더본투비 로고"
+             class="h-14 object-contain hidden md:block"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+        <span class="text-xl font-black text-gray-900 hidden" style="display:none;">더본투비</span>
+        <img src="https://cdn.imweb.me/thumbnail/20230314/9c3b2278bb63e.png"
+             alt="더본투비"
+             class="h-12 object-contain md:hidden"
+             onerror="this.style.display='none';" />
+      </a>
+
+      <!-- Search bar -->
+      <div class="flex-1 max-w-lg mx-auto hidden sm:block">
+        <div class="flex border-2 border-gray-900 rounded overflow-hidden">
+          <input type="text"
+                 placeholder="상품명을 검색해보세요"
+                 class="search-input flex-1 px-4 py-2 text-sm text-gray-700 bg-white"
+                 readonly />
+          <button class="bg-gray-900 text-white px-4 py-2 hover:bg-gray-700 transition-colors flex-shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Delivery badge + Mobile menu btn -->
+      <div class="flex items-center gap-3 ml-auto flex-shrink-0">
+        <div class="delivery-badge flex items-center gap-1.5 hidden md:flex">
+          <svg class="w-4 h-4 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+          </svg>
+          <div class="text-xs leading-tight">
+            <div class="font-bold text-red-700">우체국</div>
+            <div class="text-gray-600">택배발송</div>
+          </div>
+        </div>
+
+        <!-- Cart icon (mobile) -->
+        <a href="#" class="relative sm:hidden">
+          <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+          <span class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
+        </a>
+
+        <!-- Hamburger -->
+        <button id="mobileMenuBtn" class="md:hidden p-1" onclick="toggleMobileMenu()">
+          <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile search -->
+    <div class="sm:hidden px-4 pb-3">
+      <div class="flex border border-gray-300 rounded overflow-hidden">
+        <input type="text" placeholder="상품을 검색해보세요"
+               class="flex-1 px-3 py-2 text-sm bg-white" readonly />
+        <button class="bg-gray-900 text-white px-3">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== NAVIGATION ===== -->
+    <nav class="border-t border-gray-200 bg-white hidden md:block">
+      <div class="max-w-screen-xl mx-auto px-4">
+        <ul class="flex items-center gap-0">
+          <li><a href="#" class="nav-link block px-4 py-3 text-sm font-semibold text-gray-800 hover:text-gray-900 transition-colors">HOME</a></li>
+          <li><a href="#" class="nav-link block px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">기기&amp;악세사리</a></li>
+          <li><a href="#" class="nav-link block px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">팟/카트리지/코일</a></li>
+          <li><a href="#" class="nav-link block px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">무니코틴</a></li>
+          <li><a href="#" class="nav-link block px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">생활용품</a></li>
+          <li>
+            <a href="#" class="nav-link block px-4 py-3 text-sm font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-0.5">
+              <span>❤️</span>앵그리<span>❤️</span>
+            </a>
+          </li>
+          <li><a href="#" class="nav-link block px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">기성 액상</a></li>
+          <li><a href="#" class="nav-link block px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">모드 액상</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="mobile-menu md:hidden bg-white border-t border-gray-200">
+      <ul class="py-2">
+        <li><a href="#" class="block px-6 py-2.5 text-sm font-semibold text-gray-800 hover:bg-gray-50">HOME</a></li>
+        <li><a href="#" class="block px-6 py-2.5 text-sm text-gray-700 hover:bg-gray-50">기기&amp;악세사리</a></li>
+        <li><a href="#" class="block px-6 py-2.5 text-sm text-gray-700 hover:bg-gray-50">팟/카트리지/코일</a></li>
+        <li><a href="#" class="block px-6 py-2.5 text-sm text-gray-700 hover:bg-gray-50">무니코틴</a></li>
+        <li><a href="#" class="block px-6 py-2.5 text-sm text-gray-700 hover:bg-gray-50">생활용품</a></li>
+        <li><a href="#" class="block px-6 py-2.5 text-sm font-bold text-red-600 hover:bg-gray-50">❤️ 앵그리 ❤️</a></li>
+        <li><a href="#" class="block px-6 py-2.5 text-sm text-gray-700 hover:bg-gray-50">기성 액상</a></li>
+        <li><a href="#" class="block px-6 py-2.5 text-sm text-gray-700 hover:bg-gray-50">모드 액상</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- ===== HERO SLIDER ===== -->
+  <section class="hero-slider bg-gray-100" style="height: clamp(220px, 45vw, 580px);">
+    <div id="sliderTrack" class="relative w-full h-full">
+
+      <div class="slide active absolute inset-0">
+        <img src="https://cdn.imweb.me/thumbnail/20231220/10355eabef49a.jpg" alt="배너 1"
+             class="w-full h-full object-cover object-center" />
+      </div>
+      <div class="slide absolute inset-0">
+        <img src="https://cdn.imweb.me/thumbnail/20240219/1414ee1a88aef.jpg" alt="배너 2"
+             class="w-full h-full object-cover object-center" />
+      </div>
+      <div class="slide absolute inset-0">
+        <img src="https://cdn.imweb.me/thumbnail/20240619/95e9c6ffac000.png" alt="배너 3"
+             class="w-full h-full object-cover object-center" />
+      </div>
+      <div class="slide absolute inset-0">
+        <img src="https://cdn.imweb.me/thumbnail/20240424/61d9f4567e0cc.jpg" alt="배너 4"
+             class="w-full h-full object-cover object-center" />
+      </div>
+      <div class="slide absolute inset-0">
+        <img src="https://cdn.imweb.me/thumbnail/20240108/3667f7c6c72d8.png" alt="배너 5"
+             class="w-full h-full object-cover object-center" />
+      </div>
+
+    </div>
+
+    <!-- Slider controls -->
+    <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
+      <button class="slider-dot active" onclick="goToSlide(0)"></button>
+      <button class="slider-dot" onclick="goToSlide(1)"></button>
+      <button class="slider-dot" onclick="goToSlide(2)"></button>
+      <button class="slider-dot" onclick="goToSlide(3)"></button>
+      <button class="slider-dot" onclick="goToSlide(4)"></button>
+    </div>
+
+    <!-- Prev/Next arrows -->
+    <button onclick="prevSlide()"
+      class="absolute left-3 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/60 text-white rounded-full w-9 h-9 flex items-center justify-center transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </button>
+    <button onclick="nextSlide()"
+      class="absolute right-3 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/60 text-white rounded-full w-9 h-9 flex items-center justify-center transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+      </svg>
+    </button>
+  </section>
+
+  <!-- ===== PRODUCT REQUEST FORM ===== -->
+  <section class="bg-gray-900 text-white py-8">
+    <div class="max-w-screen-xl mx-auto px-4">
+      <div class="flex flex-col md:flex-row items-center gap-6">
+        <div class="text-center md:text-left flex-shrink-0">
+          <p class="text-base font-semibold leading-snug text-gray-100">찾으시는 상품을 요청해주세요.</p>
+          <p class="text-sm text-gray-400 mt-0.5">연락처로 가능 여부 알려드리겠습니다!</p>
+        </div>
+        <form class="flex flex-col sm:flex-row gap-2 flex-1 w-full" onsubmit="return false;">
+          <input type="text" placeholder="상품명"
+                 class="form-input flex-1 bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-white placeholder-gray-500 transition" />
+          <input type="text" placeholder="이름"
+                 class="form-input w-full sm:w-32 bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-white placeholder-gray-500 transition" />
+          <input type="tel" placeholder="연락처 (010-0000-0000)"
+                 class="form-input flex-1 bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-white placeholder-gray-500 transition" />
+          <button type="button"
+                  class="bg-white text-gray-900 font-bold px-6 py-2 rounded text-sm hover:bg-gray-100 transition-colors whitespace-nowrap">
+            요청하기
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== BEST PRODUCTS SECTION ===== -->
+  <section class="py-12 bg-white">
+    <div class="max-w-screen-xl mx-auto px-4">
+
+      <!-- Section Header -->
+      <div class="text-center mb-10">
+        <p class="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-2">Best Sellers</p>
+        <h2 class="text-2xl md:text-3xl font-black text-gray-900">더본투비 액상 BEST 상품</h2>
+        <div class="mt-3 flex items-center justify-center gap-3">
+          <div class="h-px bg-gray-200 w-16"></div>
+          <div class="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
+          <div class="h-px bg-gray-200 w-16"></div>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" id="productGrid">
+        <!-- Products are rendered by JS -->
+      </div>
+
+      <!-- More button -->
+      <div class="text-center mt-10">
+        <button class="border-2 border-gray-800 text-gray-800 font-semibold px-10 py-2.5 text-sm rounded hover:bg-gray-800 hover:text-white transition-colors">
+          더보기 &rarr;
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== NOTICE BANNER ===== -->
+  <section class="bg-amber-50 border-y border-amber-200 py-5">
+    <div class="max-w-screen-xl mx-auto px-4 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+      <div class="flex-shrink-0 bg-amber-400 text-amber-900 font-bold text-xs px-3 py-1.5 rounded">
+        NOTICE
+      </div>
+      <p class="text-sm text-amber-800">
+        전자담배는 <strong>성인(만 19세 이상)</strong>만 구매 가능합니다. 미성년자 판매 금지 &nbsp;|&nbsp;
+        본 사이트는 성인 인증 후 이용 가능합니다.
+      </p>
+    </div>
+  </section>
+
+  <!-- ===== INFO STRIP ===== -->
+  <section class="bg-gray-900 text-white py-8">
+    <div class="max-w-screen-xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+      <div>
+        <div class="flex justify-center mb-2">
+          <svg class="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+          </svg>
+        </div>
+        <p class="text-sm font-bold">빠른 배송</p>
+        <p class="text-xs text-gray-400 mt-0.5">오후 2시 이전 결제 시 당일 발송</p>
+      </div>
+      <div>
+        <div class="flex justify-center mb-2">
+          <svg class="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+        </div>
+        <p class="text-sm font-bold">정품 보장</p>
+        <p class="text-xs text-gray-400 mt-0.5">100% 정품만 판매합니다</p>
+      </div>
+      <div>
+        <div class="flex justify-center mb-2">
+          <svg class="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+          </svg>
+        </div>
+        <p class="text-sm font-bold">쉬운 교환/반품</p>
+        <p class="text-xs text-gray-400 mt-0.5">반품배송비 편도 3,000원</p>
+      </div>
+      <div>
+        <div class="flex justify-center mb-2">
+          <svg class="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+          </svg>
+        </div>
+        <p class="text-sm font-bold">1:1 고객상담</p>
+        <p class="text-xs text-gray-400 mt-0.5">카카오톡 채널 운영</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="bg-gray-100 border-t border-gray-200">
+    <div class="max-w-screen-xl mx-auto px-4 py-10">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+
+        <!-- Customer Center -->
+        <div>
+          <h4 class="text-xs font-bold tracking-widest text-gray-500 uppercase mb-3">CUSTOMER CENTER</h4>
+          <p class="text-2xl font-black text-gray-900 mb-1">010-8514-2001</p>
+          <div class="text-xs text-gray-500 space-y-0.5 mt-2">
+            <p>상담시간 <span class="text-gray-700 font-medium">오전 11:00 ~ 오후 6:00</span></p>
+            <p>점심시간 <span class="text-gray-700 font-medium">오후 12:00 ~ 오후 1:00</span></p>
+            <p class="text-red-500 font-medium">토/일/공휴일 휴무</p>
+          </div>
+          <!-- Kakao button -->
+          <button class="kakao-btn mt-4 flex items-center gap-2 px-4 py-2 rounded font-bold text-sm">
+            <svg viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor">
+              <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.76 1.63 5.198 4.1 6.67-.18.67-.65 2.43-.74 2.8-.1.44.16.44.34.32.14-.09 2.24-1.52 3.14-2.14.37.05.74.08 1.16.08 5.523 0 10-3.477 10-7.8C22 6.477 17.523 3 12 3z"/>
+            </svg>
+            카카오톡 1:1 채팅
+          </button>
+        </div>
+
+        <!-- Account Info -->
+        <div>
+          <h4 class="text-xs font-bold tracking-widest text-gray-500 uppercase mb-3">ACCOUNT INFO</h4>
+          <p class="text-sm font-bold text-gray-800">신한은행 140-014-056636</p>
+          <p class="text-sm text-gray-600 mt-1">예금주: <span class="font-semibold">(주)더본투비</span></p>
+          <div class="mt-4">
+            <h4 class="text-xs font-bold tracking-widest text-gray-500 uppercase mb-2">DELIVERY</h4>
+            <p class="text-sm text-gray-700">우체국 택배 / 로젠택배</p>
+          </div>
+        </div>
+
+        <!-- Return / Exchange -->
+        <div>
+          <h4 class="text-xs font-bold tracking-widest text-gray-500 uppercase mb-3">RETURN / EXCHANGE</h4>
+          <div class="text-sm text-gray-600 space-y-1">
+            <p>반품배송비 <span class="font-semibold text-gray-800">편도 3,000원</span></p>
+            <p class="text-xs leading-relaxed text-gray-500 mt-2">
+              보내실곳:<br/>
+              경기도 양평군 양평읍 십리길 19, 201호
+            </p>
+          </div>
+
+          <!-- Logo footer -->
+          <div class="mt-5 flex items-center gap-2">
+            <img src="https://cdn.imweb.me/thumbnail/20230314/f896897ec6166.png"
+                 alt="더본투비" class="h-8 object-contain opacity-60"
+                 onerror="this.style.display='none'" />
+            <img src="https://cdn.imweb.me/thumbnail/20230227/a554c65fa7f7a.png"
+                 alt="DHLUX" class="h-6 object-contain opacity-50"
+                 onerror="this.style.display='none'" />
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Legal -->
+      <div class="border-t border-gray-300 pt-6 text-xs text-gray-400">
+        <div class="flex flex-wrap gap-x-4 gap-y-1 mb-2">
+          <span>상호: (주)더본투비</span>
+          <span>대표: 홍길동</span>
+          <span>사업자등록번호: 000-00-00000</span>
+          <span>통신판매업신고: 제0000-경기양평-0000호</span>
+        </div>
+        <p class="text-gray-400">주소: 경기도 양평군 양평읍 십리길 19, 201호</p>
+        <p class="mt-2 text-gray-500">&copy; 2024 (주)더본투비 DHLUX. All rights reserved.</p>
+        <p class="mt-1 text-purple-500 font-medium">&#9729; This is a cloud infrastructure demo by Chilli Studio</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== FLOATING CART BUTTON ===== -->
+  <div class="fixed bottom-6 right-6 z-40 flex flex-col gap-3">
+    <!-- Kakao float -->
+    <button class="kakao-btn w-12 h-12 rounded-full flex items-center justify-center shadow-lg" title="카카오톡 문의">
+      <svg viewBox="0 0 24 24" class="w-6 h-6" fill="currentColor">
+        <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.76 1.63 5.198 4.1 6.67-.18.67-.65 2.43-.74 2.8-.1.44.16.44.34.32.14-.09 2.24-1.52 3.14-2.14.37.05.74.08 1.16.08 5.523 0 10-3.477 10-7.8C22 6.477 17.523 3 12 3z"/>
+      </svg>
+    </button>
+    <!-- Cart float -->
+    <button onclick="openCartDrawer()" class="bg-gray-900 w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:bg-gray-700 transition-colors relative" title="장바구니">
+      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+      </svg>
+      <span id="floatCartBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 items-center justify-center font-bold hidden"></span>
+    </button>
+    <!-- Top float -->
+    <button onclick="window.scrollTo({top:0,behavior:'smooth'})"
+      class="bg-white border border-gray-300 w-12 h-12 rounded-full flex items-center justify-center shadow hover:bg-gray-50 transition-colors" title="맨위로">
+      <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- ===== PRODUCT DETAIL OVERLAY ===== -->
+  <div id="productDetailOverlay" aria-modal="true" role="dialog">
+    <!-- Header bar -->
+    <div class="sticky top-0 z-10 bg-white border-b border-gray-200 flex items-center justify-between px-4 py-3">
+      <nav class="text-xs text-gray-400" id="detailBreadcrumb">Home &gt; 카테고리</nav>
+      <button onclick="closeDetail()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors" title="닫기">
+        <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Main content -->
+    <div class="max-w-screen-lg mx-auto px-4 py-8">
+      <!-- 2-column layout -->
+      <div class="flex flex-col md:flex-row gap-8 md:gap-12">
+
+        <!-- Left: image -->
+        <div class="md:w-1/2 flex-shrink-0">
+          <div class="rounded-xl overflow-hidden bg-gray-50 aspect-square">
+            <img id="detailImg" src="" alt="" class="w-full h-full object-cover" />
+          </div>
+        </div>
+
+        <!-- Right: info -->
+        <div class="md:w-1/2 flex flex-col gap-4">
+          <!-- Name -->
+          <h1 id="detailName" class="text-xl md:text-2xl font-black text-gray-900 leading-snug"></h1>
+
+          <!-- Price -->
+          <div class="flex items-baseline gap-3">
+            <span id="detailPrice" class="text-2xl font-black text-gray-900"></span>
+            <span id="detailOrig" class="text-sm text-gray-400 line-through hidden"></span>
+          </div>
+
+          <!-- 구매혜택 -->
+          <div class="bg-gray-50 rounded-lg p-4 text-sm space-y-2">
+            <div class="flex gap-3">
+              <span class="text-gray-500 w-20 flex-shrink-0">구매혜택</span>
+              <span class="text-gray-700">포인트 적립예정</span>
+            </div>
+            <div class="flex gap-3">
+              <span class="text-gray-500 w-20 flex-shrink-0">배송 방법</span>
+              <span class="text-gray-700">택배</span>
+            </div>
+            <div class="flex gap-3">
+              <span class="text-gray-500 w-20 flex-shrink-0">배송비</span>
+              <span class="text-gray-700">2,500원 <span class="text-gray-400">(50,000원 이상 무료배송)</span></span>
+            </div>
+            <div class="flex gap-3">
+              <span class="text-gray-500 w-20 flex-shrink-0">배송 안내</span>
+              <span class="text-gray-500 text-xs leading-relaxed">반품/교환 배송비 있습니다</span>
+            </div>
+          </div>
+
+          <!-- Options -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+              옵션 선택 <span class="text-red-500">*</span> <span class="text-gray-400 font-normal text-xs">(필수)</span>
+            </label>
+            <select id="detailOptionSelect" class="w-full border border-gray-300 rounded px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-gray-800 focus:ring-1 focus:ring-gray-800">
+              <option value="">-- 옵션을 선택해주세요 --</option>
+              <option value="30ml">30ml</option>
+              <option value="60ml">60ml</option>
+              <option value="100ml">100ml</option>
+            </select>
+          </div>
+
+          <!-- Quantity -->
+          <div>
+            <p class="text-sm font-semibold text-gray-700 mb-1.5">수량</p>
+            <div class="flex items-center">
+              <button class="qty-btn rounded-l" onclick="changeQty(-1)">&#8722;</button>
+              <div class="qty-display" id="detailQty">1</div>
+              <button class="qty-btn rounded-r" onclick="changeQty(1)">&#43;</button>
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="flex gap-3 mt-2">
+            <button onclick="handleBuyNow()" class="flex-1 bg-gray-900 text-white font-bold py-3 rounded text-sm hover:bg-gray-700 transition-colors">
+              구매하기
+            </button>
+            <button onclick="handleAddToCart()" class="flex-1 border-2 border-gray-900 text-gray-900 font-bold py-3 rounded text-sm hover:bg-gray-50 transition-colors">
+              장바구니
+            </button>
+          </div>
+
+          <p class="text-center text-xs text-gray-400">간편결제 가능</p>
+        </div>
+      </div>
+
+      <!-- Tab navigation -->
+      <div class="mt-12 border-b border-gray-200">
+        <div class="flex gap-0">
+          <button class="detail-tab active px-6 py-3 text-sm text-gray-500" data-tab="info" onclick="switchDetailTab(this, 'info')">상세정보</button>
+          <button class="detail-tab px-6 py-3 text-sm text-gray-500" data-tab="review" onclick="switchDetailTab(this, 'review')">구매평</button>
+          <button class="detail-tab px-6 py-3 text-sm text-gray-500" data-tab="qna" onclick="switchDetailTab(this, 'qna')">Q&amp;A</button>
+        </div>
+      </div>
+
+      <!-- Tab: 상세정보 -->
+      <div id="tabInfo" class="py-8">
+        <div class="max-w-2xl mx-auto space-y-2">
+          <img src="https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/2c483d0113208.jpeg" alt="상품 상세 1" class="w-full" loading="lazy" />
+          <img src="https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/cb6ae46dee9ea.jpeg" alt="상품 상세 2" class="w-full" loading="lazy" />
+          <img src="https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/591bee3b25bda.jpeg" alt="상품 상세 3" class="w-full" loading="lazy" />
+          <img src="https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/1ec32ef126a41.png?w=1920" alt="상품 상세 4" class="w-full" loading="lazy" />
+          <img src="https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/4613bc4325acb.png?w=1920" alt="상품 상세 5" class="w-full" loading="lazy" />
+        </div>
+      </div>
+
+      <!-- Tab: 구매평 -->
+      <div id="tabReview" class="py-16 text-center hidden">
+        <svg class="w-12 h-12 text-gray-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+        </svg>
+        <p class="text-gray-400 text-sm">등록된 구매평이 없습니다</p>
+      </div>
+
+      <!-- Tab: Q&A -->
+      <div id="tabQna" class="py-16 text-center hidden">
+        <svg class="w-12 h-12 text-gray-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p class="text-gray-400 text-sm">등록된 문의가 없습니다</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CART DRAWER ===== -->
+  <div id="cartDrawerBackdrop" onclick="closeCartDrawer()"></div>
+  <div id="cartDrawer" aria-modal="true" role="dialog">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200 flex-shrink-0">
+      <h2 class="text-base font-black text-gray-900">장바구니</h2>
+      <button onclick="closeCartDrawer()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
+        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Cart items (scrollable) -->
+    <div id="cartItemsList" class="flex-1 overflow-y-auto px-5 py-4 space-y-4"></div>
+
+    <!-- Footer -->
+    <div id="cartFooter" class="border-t border-gray-200 px-5 py-4 flex-shrink-0 hidden">
+      <div class="flex justify-between items-center mb-4">
+        <span class="text-sm text-gray-600">총 금액</span>
+        <span id="cartTotal" class="text-lg font-black text-gray-900"></span>
+      </div>
+      <button onclick="alert('데모 버전입니다')" class="w-full bg-gray-900 text-white font-bold py-3.5 rounded text-sm hover:bg-gray-700 transition-colors">
+        주문하기
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script>
+    // ---------- Slider ----------
+    const slides = document.querySelectorAll('.slide');
+    const dots   = document.querySelectorAll('.slider-dot');
+    let current  = 0;
+    let autoTimer;
+
+    function goToSlide(n) {
+      slides[current].classList.remove('active');
+      dots[current].classList.remove('active');
+      current = (n + slides.length) % slides.length;
+      slides[current].classList.add('active');
+      dots[current].classList.add('active');
+    }
+
+    function nextSlide() { goToSlide(current + 1); resetTimer(); }
+    function prevSlide() { goToSlide(current - 1); resetTimer(); }
+
+    function resetTimer() {
+      clearInterval(autoTimer);
+      autoTimer = setInterval(nextSlide, 4500);
+    }
+
+    resetTimer();
+
+    // ---------- Mobile Menu ----------
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobileMenu');
+      menu.classList.toggle('open');
+    }
+
+    // ---------- Products ----------
+    const products = [
+      { name: '갱쥬스빌런 인디아나 입호흡 액상',  price: '17,500원', orig: '35,000원', badges: ['SALE'],           category: '기성 액상', img: 'https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/8d3438aba3f5e.png?w=500' },
+      { name: '갱쥬스빌런 알로에블루 입호흡 액상', price: '17,500원', orig: '35,000원', badges: ['SALE'],           category: '기성 액상', img: 'https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/07e2771d71eb6.png?w=500' },
+      { name: '갱쥬스빌런 라임알로에 입호흡 액상', price: '17,500원', orig: '35,000원', badges: ['SALE'],           category: '기성 액상', img: 'https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/68571ebc1f62c.png?w=500' },
+      { name: '갱쥬스빌런 할리 입호흡 액상',       price: '17,500원', orig: '35,000원', badges: ['SALE'],           category: '기성 액상', img: 'https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/c3c0eb9292b56.png?w=500' },
+      { name: '플렉스엑스 주연엔딩',               price: '16,000원', orig: '35,000원', badges: ['SALE'],           category: '기성 액상', img: 'https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/502073d706011.png?w=500' },
+      { name: '노보 메두사 입호흡 액상',            price: '14,000원', orig: '45,000원', badges: ['SALE'],           category: '기성 액상', img: 'https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/99113d0beffcb.jpg?w=500' },
+      { name: '펠릭스 2% 고농도 입호흡 액상',      price: '15,000원', orig: null,       badges: ['BEST','MD','HOT'],category: '기성 액상', img: 'https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/c333ebf50bea3.png?w=500' },
+      { name: '노보 엠에스블랜드 0.98% 액상',      price: '12,000원', orig: '35,000원', badges: ['SALE'],           category: '기성 액상', img: 'https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/f5489ba420a9f.jpg?w=500' },
+      { name: '펠릭스 체리사와 폐호흡 액상',       price: '19,000원', orig: null,       badges: ['BEST','MD','HOT'],category: '모드 액상', img: 'https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/c34c7823d9428.png?w=500' },
+      { name: '펠릭스 자몽사와 폐호흡 액상',       price: '19,000원', orig: null,       badges: ['BEST','MD','HOT'],category: '모드 액상', img: 'https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/f578aeae5bcb0.jpg?w=500' },
+      { name: '펠릭스 유자사와 폐호흡 액상',       price: '19,000원', orig: null,       badges: ['BEST','MD','HOT'],category: '모드 액상', img: 'https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/9e9d098fb3c73.png?w=500' },
+      { name: '펠릭스 라임사와 폐호흡 액상',       price: '19,000원', orig: null,       badges: ['SOLDOUT','BEST'],category: '모드 액상', img: 'https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/56369400266c9.png?w=500' },
+      { name: '오르카 바나나 액상',                price: '13,500원', orig: null,       badges: [],                category: '기성 액상', img: 'https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/3a9730fc3d649.png?w=500' },
+      { name: '노보 타박멘솔 0.98% 액상',          price: '12,000원', orig: '35,000원', badges: ['SALE'],           category: '기성 액상', img: 'https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/3df08c8f20d94.png?w=500' },
+      { name: '노보 블랙멘솔 0.98% 액상',          price: '12,000원', orig: '35,000원', badges: ['SALE'],           category: '기성 액상', img: 'https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/ad54d378667bc.png?w=500' },
+      { name: '베라쥬스 입호흡 액상 9.8mg',        price: '13,000원', orig: null,       badges: [],                category: '기성 액상', img: 'https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/d4e851fc65f97.png?w=500' },
+      { name: '펠릭스 더블라임 입호흡 액상',       price: '15,000원', orig: '35,000원', badges: ['SALE','BEST'],   category: '기성 액상', img: 'https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/c5437bcd8d164.png?w=500' },
+      { name: '펠릭스 라임 알로에 입호흡 액상',    price: '15,000원', orig: '35,000원', badges: ['SALE','BEST'],   category: '기성 액상', img: 'https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/1f2b5724639b0.png?w=500' },
+      { name: '모코 하와이 입호흡 액상',            price: '18,000원', orig: null,       badges: [],                category: '기성 액상', img: 'https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/0fc90fe6d1782.png?w=500' },
+      { name: '앵그리 액상 nic 9.8mg',             price: '9,700원',  orig: '35,000원', badges: ['SALE'],           category: '❤️앵그리❤️', img: 'https://cdn-optimized.imweb.me/upload/S2022030712d611422a02a/4984a2f9ffcb6.png?w=500' },
+    ];
+
+    const badgeConfig = {
+      'SALE':    { label: 'SALE',    cls: 'bg-red-500' },
+      'BEST':    { label: 'BEST',    cls: 'bg-amber-500' },
+      'HOT':     { label: 'HOT',     cls: 'bg-orange-500' },
+      'NEW':     { label: 'NEW',     cls: 'bg-green-500' },
+      'SOLDOUT': { label: 'SOLDOUT', cls: 'bg-gray-400' },
+      'MD':      { label: 'MD',      cls: 'bg-purple-500' },
+    };
+
+    function renderProducts() {
+      const grid = document.getElementById('productGrid');
+      grid.innerHTML = products.map((p, i) => {
+        const badgeHtml = p.badges.map(b => {
+          const cfg = badgeConfig[b] || { label: b, cls: 'bg-gray-500' };
+          return `<span class="inline-block text-white text-[9px] font-bold px-1.5 py-0.5 rounded ${cfg.cls} leading-none">${cfg.label}</span>`;
+        }).join('');
+
+        const isSoldOut = p.badges.includes('SOLDOUT');
+        const origHtml  = p.orig
+          ? `<span class="text-gray-400 line-through text-xs">${p.orig}</span>`
+          : '';
+
+        return `
+          <div class="product-card bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm group" onclick="openDetail(${i})">
+            <!-- Image wrapper -->
+            <div class="relative overflow-hidden bg-gray-50" style="padding-top: 100%;">
+              <img src="${p.img}"
+                   alt="${p.name}"
+                   loading="lazy"
+                   class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${isSoldOut ? 'opacity-50' : ''}"
+                   onerror="this.style.background='#f3f4f6'; this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%22100%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2212%22 fill=%22%239ca3af%22>No Image</text></svg>'" />
+              ${isSoldOut ? '<div class="absolute inset-0 flex items-center justify-center"><span class="bg-gray-600/80 text-white text-xs font-bold px-3 py-1 rounded">SOLD OUT</span></div>' : ''}
+              <!-- Quick action overlay -->
+              <div class="card-overlay absolute inset-0 bg-black/30 flex items-center justify-center gap-2">
+                <button class="bg-white text-gray-800 text-xs font-semibold px-3 py-1.5 rounded hover:bg-gray-100 transition" onclick="event.stopPropagation(); openDetail(${i})">
+                  빠른보기
+                </button>
+              </div>
+              <!-- Badge row -->
+              ${p.badges.length > 0 ? `<div class="absolute top-2 left-2 flex flex-wrap gap-1">${badgeHtml}</div>` : ''}
+              <!-- Wishlist -->
+              <button class="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full w-7 h-7 flex items-center justify-center shadow-sm transition-colors" title="관심상품" onclick="event.stopPropagation()">
+                <svg class="w-3.5 h-3.5 text-gray-500 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Info -->
+            <div class="p-3">
+              <p class="text-xs text-gray-800 font-medium leading-snug line-clamp-2 min-h-[2.5rem]">${p.name}</p>
+              <div class="mt-2 flex flex-col gap-0.5">
+                ${origHtml}
+                <span class="text-sm font-black text-gray-900">${p.price}</span>
+              </div>
+              ${!isSoldOut ? `
+              <button class="mt-2.5 w-full bg-gray-900 text-white text-xs font-semibold py-1.5 rounded hover:bg-gray-700 transition-colors" onclick="event.stopPropagation(); quickAddToCart(${i})">
+                장바구니 담기
+              </button>` : `
+              <button class="mt-2.5 w-full bg-gray-200 text-gray-400 text-xs font-semibold py-1.5 rounded cursor-not-allowed" disabled onclick="event.stopPropagation()">
+                품절
+              </button>`}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    renderProducts();
+
+    // ---------- Cart State ----------
+    let cart = [];
+
+    function priceToNumber(priceStr) {
+      return parseInt(priceStr.replace(/[^0-9]/g, ''), 10);
+    }
+
+    function updateCartBadges() {
+      const total = cart.reduce((sum, item) => sum + item.qty, 0);
+      const floatBadge = document.getElementById('floatCartBadge');
+      if (total > 0) {
+        floatBadge.textContent = total > 99 ? '99+' : total;
+        floatBadge.style.display = 'flex';
+      } else {
+        floatBadge.style.display = 'none';
+      }
+    }
+
+    function renderCartItems() {
+      const list = document.getElementById('cartItemsList');
+      const footer = document.getElementById('cartFooter');
+
+      if (cart.length === 0) {
+        list.innerHTML = `
+          <div class="flex flex-col items-center justify-center h-full py-16 text-center">
+            <svg class="w-14 h-14 text-gray-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            <p class="text-gray-400 text-sm font-medium">장바구니가 비어있습니다</p>
+            <p class="text-gray-300 text-xs mt-1">상품을 담아보세요</p>
+          </div>`;
+        footer.classList.add('hidden');
+        return;
+      }
+
+      footer.classList.remove('hidden');
+
+      list.innerHTML = cart.map((item, idx) => `
+        <div class="flex gap-3 py-3 border-b border-gray-100 last:border-0">
+          <div class="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-50">
+            <img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover" />
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-semibold text-gray-800 leading-snug line-clamp-2">${item.name}</p>
+            ${item.option ? `<p class="text-xs text-gray-400 mt-0.5">${item.option}</p>` : ''}
+            <div class="flex items-center justify-between mt-2">
+              <div class="flex items-center border border-gray-200 rounded overflow-hidden">
+                <button onclick="changeCartQty(${idx}, -1)" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-gray-100 text-sm transition-colors">&#8722;</button>
+                <span class="w-7 text-center text-xs font-semibold">${item.qty}</span>
+                <button onclick="changeCartQty(${idx}, 1)" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-gray-100 text-sm transition-colors">&#43;</button>
+              </div>
+              <span class="text-sm font-black text-gray-900">${(priceToNumber(item.price) * item.qty).toLocaleString()}원</span>
+            </div>
+          </div>
+          <button onclick="removeCartItem(${idx})" class="flex-shrink-0 w-6 h-6 flex items-center justify-center text-gray-300 hover:text-red-400 transition-colors mt-0.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      `).join('');
+
+      const totalNum = cart.reduce((sum, item) => sum + priceToNumber(item.price) * item.qty, 0);
+      document.getElementById('cartTotal').textContent = totalNum.toLocaleString() + '원';
+    }
+
+    function quickAddToCart(productIndex) {
+      const p = products[productIndex];
+      if (p.badges.includes('SOLDOUT')) return;
+      addItemToCart(p, null, 1);
+      openCartDrawer();
+    }
+
+    function addItemToCart(product, option, qty) {
+      const key = product.name + '|' + (option || '');
+      const existing = cart.find(c => c.key === key);
+      if (existing) {
+        existing.qty += qty;
+      } else {
+        cart.push({ key, name: product.name, price: product.price, img: product.img, option, qty });
+      }
+      updateCartBadges();
+    }
+
+    function changeCartQty(idx, delta) {
+      cart[idx].qty += delta;
+      if (cart[idx].qty < 1) cart[idx].qty = 1;
+      renderCartItems();
+      updateCartBadges();
+    }
+
+    function removeCartItem(idx) {
+      cart.splice(idx, 1);
+      renderCartItems();
+      updateCartBadges();
+    }
+
+    // ---------- Cart Drawer ----------
+    function openCartDrawer() {
+      renderCartItems();
+      document.getElementById('cartDrawer').classList.add('open');
+      document.getElementById('cartDrawerBackdrop').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeCartDrawer() {
+      document.getElementById('cartDrawer').classList.remove('open');
+      document.getElementById('cartDrawerBackdrop').classList.remove('open');
+      // Only restore scroll if detail is also closed
+      if (!document.getElementById('productDetailOverlay').classList.contains('open')) {
+        document.body.style.overflow = '';
+      }
+    }
+
+    // ---------- Product Detail ----------
+    let activeProductIndex = null;
+    let detailQty = 1;
+
+    function openDetail(idx) {
+      const p = products[idx];
+      activeProductIndex = idx;
+      detailQty = 1;
+
+      document.getElementById('detailImg').src = p.img;
+      document.getElementById('detailImg').alt = p.name;
+      document.getElementById('detailName').textContent = p.name;
+      document.getElementById('detailPrice').textContent = p.price;
+      document.getElementById('detailQty').textContent = '1';
+      document.getElementById('detailOptionSelect').value = '';
+
+      const origEl = document.getElementById('detailOrig');
+      if (p.orig) {
+        origEl.textContent = p.orig;
+        origEl.classList.remove('hidden');
+      } else {
+        origEl.classList.add('hidden');
+      }
+
+      document.getElementById('detailBreadcrumb').innerHTML =
+        'Home &gt; <span class="text-gray-700 font-medium">' + (p.category || '카테고리') + '</span>';
+
+      // Reset tabs to info
+      switchDetailTab(document.querySelector('.detail-tab[data-tab="info"]'), 'info');
+
+      const overlay = document.getElementById('productDetailOverlay');
+      overlay.scrollTop = 0;
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDetail() {
+      document.getElementById('productDetailOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function switchDetailTab(btn, tabId) {
+      document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      ['tabInfo', 'tabReview', 'tabQna'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      const map = { info: 'tabInfo', review: 'tabReview', qna: 'tabQna' };
+      document.getElementById(map[tabId]).classList.remove('hidden');
+    }
+
+    function changeQty(delta) {
+      detailQty = Math.max(1, detailQty + delta);
+      document.getElementById('detailQty').textContent = detailQty;
+    }
+
+    function handleAddToCart() {
+      if (activeProductIndex === null) return;
+      const p = products[activeProductIndex];
+      if (p.badges.includes('SOLDOUT')) return;
+      const option = document.getElementById('detailOptionSelect').value || null;
+      addItemToCart(p, option, detailQty);
+      closeDetail();
+      openCartDrawer();
+    }
+
+    function handleBuyNow() {
+      alert('데모 버전입니다');
+    }
+
+    // Escape key closes overlays
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        if (document.getElementById('cartDrawer').classList.contains('open')) {
+          closeCartDrawer();
+        } else if (document.getElementById('productDetailOverlay').classList.contains('open')) {
+          closeDetail();
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>
