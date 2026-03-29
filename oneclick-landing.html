@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>원클릭사이트제작 — 빠르게, 제대로 만드는 사이트</title>
+<meta name="description" content="쿠팡·토스 출신 엔지니어가 만드는 고퀄리티 웹사이트. 310만 MAU 서비스 구축 경험. 무료 상담 신청하세요.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Noto Sans KR', -apple-system, sans-serif;
+  background: #ffffff;
+  color: #374151;
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ── Nav ── */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(229,231,235,0.6);
+  z-index: 100;
+  padding: 0 40px;
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo {
+  font-weight: 900; font-size: 17px; color: #111827;
+  letter-spacing: -0.5px;
+}
+.nav-logo .accent { color: #4f46e5; }
+.nav-links { display: flex; gap: 28px; align-items: center; }
+.nav-links a {
+  text-decoration: none; color: #6b7280; font-size: 14px; font-weight: 500;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: #111827; }
+.nav-cta {
+  background: #4f46e5; color: #fff !important;
+  padding: 8px 20px; border-radius: 8px;
+  font-weight: 700; font-size: 13px;
+  transition: background 0.2s, transform 0.15s;
+}
+.nav-cta:hover { background: #4338ca; transform: translateY(-1px); }
+
+/* ── Hero ── */
+.hero {
+  min-height: 100vh;
+  display: flex; align-items: center;
+  padding: 120px 40px 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+}
+.hero-content { max-width: 680px; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 700;
+  color: #4f46e5;
+  background: #eef2ff;
+  border: 1px solid #e0e7ff;
+  border-radius: 100px;
+  padding: 7px 18px;
+  margin-bottom: 28px;
+}
+.hero-badge .pulse {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #4f46e5;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.hero h1 {
+  font-size: clamp(38px, 5.5vw, 60px);
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: -2.5px;
+  color: #111827;
+  margin-bottom: 20px;
+}
+.hero h1 .accent {
+  color: #4f46e5;
+  position: relative;
+}
+.hero h1 .accent::after {
+  content: '';
+  position: absolute;
+  bottom: 2px; left: 0; right: 0;
+  height: 8px;
+  background: rgba(79,70,229,0.15);
+  border-radius: 4px;
+  z-index: -1;
+}
+.hero-desc {
+  font-size: 17px; color: #6b7280;
+  max-width: 540px;
+  line-height: 1.9;
+  margin-bottom: 40px;
+}
+.hero-desc strong { color: #111827; font-weight: 700; }
+.hero-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 56px; }
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #4f46e5; color: #ffffff;
+  font-size: 15px; font-weight: 700;
+  padding: 16px 36px;
+  border-radius: 12px;
+  text-decoration: none; border: none; cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(79,70,229,0.3);
+}
+.btn-outline {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #ffffff; color: #4f46e5;
+  font-size: 15px; font-weight: 700;
+  padding: 16px 36px;
+  border-radius: 12px;
+  text-decoration: none;
+  border: 2px solid #e0e7ff;
+  transition: background 0.2s, border-color 0.2s;
+}
+.btn-outline:hover {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+}
+.hero-metrics { display: flex; gap: 40px; flex-wrap: wrap; }
+.hero-metric { border-left: 3px solid #e0e7ff; padding-left: 20px; }
+.hero-metric .val {
+  font-size: 30px; font-weight: 900; color: #4f46e5;
+  letter-spacing: -1px; line-height: 1.2;
+}
+.hero-metric .desc { font-size: 13px; color: #9ca3af; margin-top: 2px; }
+
+/* ── Sections ── */
+section { padding: 100px 40px; }
+.section-inner { max-width: 1100px; margin: 0 auto; }
+.section-label {
+  font-size: 13px; font-weight: 700; color: #4f46e5;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.section-title {
+  font-size: clamp(28px, 3.5vw, 42px);
+  font-weight: 900;
+  letter-spacing: -1.5px;
+  line-height: 1.25;
+  color: #111827;
+  margin-bottom: 12px;
+}
+.section-desc {
+  font-size: 16px; color: #9ca3af;
+  max-width: 520px; line-height: 1.8;
+  margin-bottom: 56px;
+}
+
+/* ── Services ── */
+.services-section { background: #f9fafb; }
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.service-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 32px 28px;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.service-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.06);
+  border-color: #c7d2fe;
+}
+.service-icon {
+  width: 48px; height: 48px;
+  background: #eef2ff;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  margin-bottom: 18px;
+}
+.service-card h3 {
+  font-size: 17px; font-weight: 800;
+  color: #111827; margin-bottom: 8px;
+  letter-spacing: -0.3px;
+}
+.service-card p {
+  font-size: 14px; color: #6b7280;
+  line-height: 1.7;
+}
+
+/* ── Portfolio ── */
+.portfolio-section { background: #ffffff; }
+.project-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+  margin-bottom: 80px;
+  padding-bottom: 80px;
+  border-bottom: 1px solid #f3f4f6;
+}
+.project-card:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.project-card.reverse { grid-template-columns: 1fr 1fr; }
+.project-card.reverse .project-info { order: 2; }
+.project-card.reverse > *:first-child { order: 2; }
+.project-card.reverse > *:last-child { order: 1; }
+.project-tag {
+  display: inline-block;
+  font-size: 12px; font-weight: 700;
+  padding: 5px 14px;
+  border-radius: 6px;
+  margin-bottom: 14px;
+}
+.project-tag.ai { background: #eef2ff; color: #4f46e5; border: 1px solid #c7d2fe; }
+.project-tag.app { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+.project-tag.web { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+.project-tag.event { background: #faf5ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+.project-info h3 {
+  font-size: 26px; font-weight: 900;
+  letter-spacing: -0.5px;
+  color: #111827;
+  margin-bottom: 10px;
+}
+.project-info > p {
+  font-size: 15px; color: #6b7280; line-height: 1.8;
+  margin-bottom: 20px;
+}
+.project-features {
+  display: flex; flex-direction: column; gap: 6px;
+  margin-bottom: 20px;
+}
+.project-feature {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; color: #374151; line-height: 1.6;
+}
+.project-feature .check { color: #4f46e5; font-size: 14px; font-weight: 700; min-width: 16px; }
+.project-tech { display: flex; gap: 6px; flex-wrap: wrap; }
+.project-tech span {
+  background: #f3f4f6; border: 1px solid #e5e7eb;
+  color: #6b7280; font-size: 12px; font-weight: 500;
+  padding: 4px 12px; border-radius: 6px;
+}
+
+/* ── Mockups ── */
+.phone-mockup-group { display: flex; gap: 16px; justify-content: center; align-items: flex-start; }
+.phone-mockup {
+  width: 220px;
+  background: #1a1a1a;
+  border-radius: 28px;
+  border: 3px solid #d1d5db;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+}
+.phone-mockup.small { width: 180px; transform: translateY(20px); opacity: 0.9; }
+.phone-notch {
+  width: 80px; height: 20px;
+  background: #1a1a1a;
+  border-radius: 0 0 12px 12px;
+  margin: 0 auto;
+}
+.phone-screen img, .phone-screen video { width: 100%; display: block; }
+.web-mockup {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.08);
+}
+.web-toolbar {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 14px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+.web-dot { width: 10px; height: 10px; border-radius: 50%; }
+.web-dot.r { background: #fca5a5; }
+.web-dot.y { background: #fcd34d; }
+.web-dot.g { background: #a5b4fc; }
+.web-url {
+  flex: 1; text-align: center;
+  font-size: 11px; color: #9ca3af;
+  background: #f3f4f6;
+  padding: 4px 12px; border-radius: 6px;
+  margin-left: 8px;
+}
+.web-mockup img { width: 100%; display: block; }
+.screenshot-gallery {
+  display: flex; gap: 8px; margin-top: 14px;
+  justify-content: center; flex-wrap: wrap;
+}
+.screenshot-gallery .mini-phone {
+  width: 80px;
+  background: #1a1a1a;
+  border-radius: 12px;
+  border: 2px solid #d1d5db;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+.screenshot-gallery .mini-phone:hover { transform: scale(1.08); }
+.screenshot-gallery .mini-phone img { width: 100%; display: block; }
+summary::-webkit-details-marker { display: none; }
+
+/* ── Mid CTA ── */
+.mid-cta {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  text-align: center;
+  padding: 72px 40px;
+}
+.mid-cta h2 {
+  font-size: clamp(24px, 3.5vw, 36px);
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -1px;
+  margin-bottom: 12px;
+}
+.mid-cta p {
+  font-size: 16px; color: rgba(255,255,255,0.75);
+  margin-bottom: 32px;
+}
+.btn-white {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #ffffff; color: #4f46e5;
+  font-size: 15px; font-weight: 700;
+  padding: 16px 40px;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-white:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+/* ── Team ── */
+.team-section { background: #f9fafb; }
+.team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.team-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 32px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.team-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.05);
+}
+.team-card .role {
+  font-size: 12px; font-weight: 700;
+  color: #4f46e5; background: #eef2ff;
+  display: inline-block;
+  padding: 4px 12px; border-radius: 6px;
+  margin-bottom: 12px;
+}
+.team-card h3 { font-size: 20px; font-weight: 800; color: #111827; margin-bottom: 6px; }
+.team-card .sub { font-size: 14px; color: #9ca3af; margin-bottom: 16px; }
+.team-highlights { display: flex; flex-direction: column; gap: 6px; }
+.team-highlights li {
+  font-size: 14px; color: #374151;
+  display: flex; align-items: flex-start; gap: 8px;
+  list-style: none; line-height: 1.6;
+}
+.team-highlights li::before {
+  content: '\2022'; color: #c7d2fe; font-size: 16px; margin-top: 1px; min-width: 10px;
+}
+
+/* ── Tech Stack ── */
+.stack-section { background: #ffffff; }
+.stack-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.stack-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px 20px;
+  text-align: center;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.stack-card:hover { border-color: #4f46e5; transform: translateY(-2px); }
+.stack-card .ico { font-size: 28px; margin-bottom: 10px; }
+.stack-card h4 { font-size: 14px; font-weight: 700; color: #111827; margin-bottom: 4px; }
+.stack-card p { font-size: 13px; color: #9ca3af; line-height: 1.5; }
+
+/* ── Contact Form ── */
+.contact-section {
+  background: #111827;
+  color: #ffffff;
+}
+.contact-inner {
+  max-width: 1100px; margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+.contact-info .section-label { color: #818cf8; }
+.contact-info h2 {
+  font-size: clamp(28px, 3.5vw, 40px);
+  font-weight: 900;
+  letter-spacing: -1.5px;
+  color: #ffffff;
+  margin-bottom: 16px;
+  line-height: 1.25;
+}
+.contact-info p {
+  font-size: 16px; color: #9ca3af;
+  line-height: 1.8; margin-bottom: 32px;
+}
+.contact-benefits { display: flex; flex-direction: column; gap: 12px; }
+.contact-benefit {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 15px; color: #d1d5db;
+}
+.contact-benefit .icon {
+  width: 36px; height: 36px;
+  background: rgba(79,70,229,0.2);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.contact-form {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 36px;
+  backdrop-filter: blur(8px);
+}
+.form-group { margin-bottom: 20px; }
+.form-group label {
+  display: block;
+  font-size: 13px; font-weight: 600;
+  color: #d1d5db;
+  margin-bottom: 8px;
+}
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 15px;
+  color: #ffffff;
+  font-family: 'Noto Sans KR', sans-serif;
+  transition: border-color 0.2s;
+  outline: none;
+}
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: rgba(255,255,255,0.3);
+}
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: #4f46e5;
+}
+.form-group textarea { resize: vertical; min-height: 100px; }
+.form-group select option { background: #1f2937; color: #fff; }
+.btn-submit {
+  width: 100%;
+  background: #4f46e5;
+  color: #ffffff;
+  font-size: 16px; font-weight: 800;
+  padding: 16px;
+  border-radius: 12px;
+  border: none; cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.btn-submit:hover { background: #4338ca; transform: translateY(-1px); }
+.btn-submit:active { transform: translateY(0); }
+.form-note {
+  font-size: 12px; color: rgba(255,255,255,0.35);
+  text-align: center; margin-top: 12px;
+}
+
+/* ── Footer ── */
+footer {
+  background: #0a0f1a;
+  color: #6b7280;
+  padding: 40px;
+  text-align: center;
+  font-size: 13px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+footer .brand { color: #9ca3af; font-weight: 700; }
+
+/* ── Fade animation ── */
+.fade-up {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+.fade-up.delay-1 { transition-delay: 0.1s; }
+.fade-up.delay-2 { transition-delay: 0.2s; }
+.fade-up.delay-3 { transition-delay: 0.3s; }
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .project-card { grid-template-columns: 1fr; gap: 40px; }
+  .project-card.reverse .project-info { order: 0; }
+  .project-card.reverse > *:first-child { order: 0; }
+  .project-card.reverse > *:last-child { order: 0; }
+  .team-grid { grid-template-columns: 1fr; }
+  .contact-inner { grid-template-columns: 1fr; gap: 40px; }
+  .stack-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  section { padding: 64px 20px; }
+  .nav { padding: 0 20px; }
+  .nav-links a:not(.nav-cta) { display: none; }
+  .hero { padding: 100px 20px 60px; min-height: auto; }
+  .hero-metrics { gap: 24px; }
+  .hero-metric .val { font-size: 24px; }
+  .services-grid { grid-template-columns: 1fr; }
+  .phone-mockup-group { flex-direction: column; align-items: center; }
+  .phone-mockup.small { transform: none; }
+  .mid-cta { padding: 56px 20px; }
+}
+@media (max-width: 480px) {
+  .stack-grid { grid-template-columns: 1fr; }
+  .hero-actions { flex-direction: column; }
+  .hero-actions a, .hero-actions button { width: 100%; justify-content: center; }
+  .hero-metrics { flex-direction: column; gap: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ Nav ═══ -->
+<nav class="nav" aria-label="주요 메뉴">
+  <div class="nav-logo">원클릭<span class="accent">사이트제작</span></div>
+  <div class="nav-links">
+    <a href="#services">서비스</a>
+    <a href="#portfolio">포트폴리오</a>
+    <a href="#team">팀</a>
+    <a href="#contact" class="nav-cta">무료 상담</a>
+  </div>
+</nav>
+
+<!-- ═══ Hero ═══ -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge fade-up">
+      <span class="pulse"></span>
+      프로젝트 상담 가능
+    </div>
+    <h1 class="fade-up">
+      속도와 퀄리티,<br>
+      <span class="accent">두 마리 토끼를 잡습니다</span>
+    </h1>
+    <p class="hero-desc fade-up">
+      <strong>쿠팡 · 토스 출신 엔지니어</strong>가 직접 만듭니다.
+      쇼핑몰부터 AI 플랫폼까지, <strong>속도와 퀄리티</strong> 두 마리 토끼를
+      모두 잡는 원클릭사이트제작입니다.
+    </p>
+    <div class="hero-actions fade-up">
+      <a href="#contact" class="btn-primary">무료 상담 신청 &rarr;</a>
+      <a href="#portfolio" class="btn-outline">포트폴리오 보기</a>
+    </div>
+    <div class="hero-metrics fade-up">
+      <div class="hero-metric">
+        <div class="val">310만</div>
+        <div class="desc">MAU 서비스 구축</div>
+      </div>
+      <div class="hero-metric">
+        <div class="val">130만</div>
+        <div class="desc">MAU 앱 개발</div>
+      </div>
+      <div class="hero-metric">
+        <div class="val">700만</div>
+        <div class="desc">가입자 플랫폼</div>
+      </div>
+      <div class="hero-metric">
+        <div class="val">6개월</div>
+        <div class="desc">무상 보수 포함</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Services ═══ -->
+<section class="services-section" id="services">
+  <div class="section-inner">
+    <div class="section-label fade-up">SERVICES</div>
+    <div class="section-title fade-up">이런 사이트, 만들어 드립니다</div>
+    <p class="section-desc fade-up">단순 템플릿이 아닙니다. 비즈니스에 맞는 맞춤형 사이트를 빠르게 구축합니다.</p>
+    <div class="services-grid">
+      <div class="service-card fade-up">
+        <div class="service-icon">&#128722;</div>
+        <h3>쇼핑몰 · 이커머스</h3>
+        <p>Cafe24, Shopify 이관부터 커스텀 쇼핑몰까지. 결제, 배송, 재고 관리 올인원 구축.</p>
+      </div>
+      <div class="service-card fade-up delay-1">
+        <div class="service-icon">&#129302;</div>
+        <h3>AI · LLM 서비스</h3>
+        <p>RAG 시스템, AI 챗봇, 자동화 파이프라인. 프로덕션 레벨 AI 서비스를 구축합니다.</p>
+      </div>
+      <div class="service-card fade-up delay-2">
+        <div class="service-icon">&#128241;</div>
+        <h3>웹 · 앱 개발</h3>
+        <p>반응형 웹사이트, 하이브리드 앱, 관리자 대시보드. 기획부터 배포까지 원스톱.</p>
+      </div>
+      <div class="service-card fade-up">
+        <div class="service-icon">&#128200;</div>
+        <h3>어드민 · CMS</h3>
+        <p>맞춤형 관리자 패널, 데이터 대시보드, CMS 구축. 운영 효율을 극대화합니다.</p>
+      </div>
+      <div class="service-card fade-up delay-1">
+        <div class="service-icon">&#128640;</div>
+        <h3>MVP · 프로토타입</h3>
+        <p>아이디어를 빠르게 검증. 최소 기능 제품을 4주 내 구축하여 시장 반응을 확인합니다.</p>
+      </div>
+      <div class="service-card fade-up delay-2">
+        <div class="service-icon">&#128196;</div>
+        <h3>제안서 · 프레젠테이션</h3>
+        <p>투자유치, 클라이언트 미팅용 인터랙티브 제안서. 데이터 기반 설득력 있는 자료 제작.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Portfolio ═══ -->
+<section class="portfolio-section" id="portfolio">
+  <div class="section-inner">
+    <div class="section-label fade-up">PORTFOLIO</div>
+    <div class="section-title fade-up">직접 설계하고 출시한 서비스</div>
+    <p class="section-desc fade-up">대규모 트래픽부터 AI 서비스까지, 실제 출시한 프로젝트입니다.</p>
+
+    <!-- 1. foa.wtf -->
+    <div class="project-card fade-up">
+      <div class="project-info">
+        <div class="project-tag ai">LLM 서비스 &mdash; AI 대화 엔진</div>
+        <h3>기억 치유 AI 대화</h3>
+        <p>카카오톡 대화 데이터를 분석하여 특정인의 말투와 성격을 재현하는 AI 챗봇. LLM + RAG를 결합한 감성적 대화 경험.</p>
+        <div class="project-features">
+          <div class="project-feature"><span class="check">&#10003;</span> 카카오톡 대화 파싱 &amp; 화자별 말투 분석</div>
+          <div class="project-feature"><span class="check">&#10003;</span> RAG 기반 장기 기억 유지 시스템</div>
+          <div class="project-feature"><span class="check">&#10003;</span> 비동기 LLM 스트리밍 응답</div>
+        </div>
+        <div class="project-tech">
+          <span>LLM</span><span>RAG</span><span>Next.js</span><span>FastAPI</span><span>Vector DB</span>
+        </div>
+      </div>
+      <div>
+        <div class="phone-mockup" style="margin:0 auto;">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <video autoplay muted loop playsinline poster="portfolio-images/foa-ai-chat.jpg" style="width:100%;display:block;">
+              <source src="portfolio-images/foa-ai-demo.mp4" type="video/mp4">
+              <img src="portfolio-images/foa-ai-chat.jpg" alt="기억 치유 AI 대화 화면">
+            </video>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. MoneyWalk RAG -->
+    <div class="project-card reverse fade-up">
+      <div class="project-info">
+        <div class="project-tag ai">RAG 시스템 &mdash; 130만 MAU</div>
+        <h3>머니워크 RAG 시스템</h3>
+        <p>130만 유저 헬스케어 앱에서 RAG 파이프라인을 직접 설계·구축. 하이브리드 검색과 리랭킹으로 프로덕션 레벨 정확도를 달성.</p>
+        <div class="project-features">
+          <div class="project-feature"><span class="check">&#10003;</span> BM25 + 벡터 하이브리드 검색 (RRF)</div>
+          <div class="project-feature"><span class="check">&#10003;</span> Cross-Encoder 리랭킹</div>
+          <div class="project-feature"><span class="check">&#10003;</span> Neo4j Knowledge Graph 연동</div>
+        </div>
+        <div class="project-tech">
+          <span>RAG</span><span>BM25</span><span>Pinecone</span><span>Neo4j</span><span>Python</span>
+        </div>
+      </div>
+      <div>
+        <div class="phone-mockup-group">
+          <div class="phone-mockup">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <img src="portfolio-images/moneywalk-home.PNG" alt="머니워크 홈">
+            </div>
+          </div>
+          <div class="phone-mockup small">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <img src="portfolio-images/moneywalk-health.PNG" alt="머니워크 건강">
+            </div>
+          </div>
+        </div>
+        <div class="screenshot-gallery">
+          <div class="mini-phone"><img src="portfolio-images/moneywalk-benefits.jpg" alt="혜택"></div>
+          <div class="mini-phone"><img src="portfolio-images/moneywalk-steps.PNG" alt="걸음수"></div>
+          <div class="mini-phone"><img src="portfolio-images/moneywalk-streak25.PNG" alt="연속달성"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Alwayz -->
+    <div class="project-card fade-up">
+      <div class="project-info">
+        <div class="project-tag app">0&rarr;1 풀스택 &mdash; 310만 MAU</div>
+        <h3>올웨이즈 (Alwayz)</h3>
+        <p>가입자 700만, MAU 310만의 디스커버리 이커머스 플랫폼. 핵심 서비스를 MERN 스택 + Native 모듈로 직접 구현. 월 GMV 530억.</p>
+        <div class="project-features">
+          <div class="project-feature"><span class="check">&#10003;</span> MERN 스택 풀스택 구현</div>
+          <div class="project-feature"><span class="check">&#10003;</span> Android (Java) / iOS (Obj-C) Native 모듈</div>
+          <div class="project-feature"><span class="check">&#10003;</span> MAU 310만 / 리텐션 80%</div>
+        </div>
+        <div class="project-tech">
+          <span>MongoDB</span><span>Express.js</span><span>React</span><span>Node.js</span><span>Java</span>
+        </div>
+      </div>
+      <div>
+        <div class="web-mockup">
+          <div class="web-toolbar">
+            <div class="web-dot r"></div>
+            <div class="web-dot y"></div>
+            <div class="web-dot g"></div>
+            <div class="web-url">alwayz.co.kr</div>
+          </div>
+          <img src="portfolio-images/alwayz-commerce.jpg" alt="올웨이즈 이커머스">
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Doeat -->
+    <div class="project-card reverse fade-up">
+      <div class="project-info">
+        <div class="project-tag app">배달 커머스 &mdash; 물류 시스템 구축</div>
+        <h3>두잇 (Doeat)</h3>
+        <p>한국 최초 개별 주문 무료 배달 서비스. 1인 가구 배달 커머스 앱의 물류 시스템과 머천트 관리 전반을 담당.</p>
+        <div class="project-features">
+          <div class="project-feature"><span class="check">&#10003;</span> 3PL 물류 시스템 구축 &amp; 자동 배차</div>
+          <div class="project-feature"><span class="check">&#10003;</span> 데이터 기반 머천트 판매 전략 수립</div>
+          <div class="project-feature"><span class="check">&#10003;</span> 주문 취소율 감소 &amp; 운영 최적화</div>
+        </div>
+        <div class="project-tech">
+          <span>커머스</span><span>물류</span><span>머천트 관리</span><span>데이터 분석</span>
+        </div>
+      </div>
+      <div>
+        <div class="web-mockup">
+          <div class="web-toolbar">
+            <div class="web-dot r"></div>
+            <div class="web-dot y"></div>
+            <div class="web-dot g"></div>
+            <div class="web-url">doeat.co.kr</div>
+          </div>
+          <img src="portfolio-images/doeat.avif" alt="두잇 배달 커머스">
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. TicketMatch -->
+    <div class="project-card fade-up">
+      <div class="project-info">
+        <div class="project-tag web">풀스택 &mdash; Next.js 15 + GPT-4.1</div>
+        <h3>티켓매치 (TicketMatch)</h3>
+        <p>국내 4대 티켓 플랫폼 공연을 자동 수집하고, GPT-4.1로 AI 분류 및 다국어 번역 파이프라인을 구축.</p>
+        <div class="project-features">
+          <div class="project-feature"><span class="check">&#10003;</span> GPT-4.1 자동 분류 + Function Calling</div>
+          <div class="project-feature"><span class="check">&#10003;</span> 다국어 번역 (ko/en/ja)</div>
+          <div class="project-feature"><span class="check">&#10003;</span> 토스페이먼츠 결제 연동</div>
+        </div>
+        <div class="project-tech">
+          <span>Next.js 15</span><span>React 19</span><span>FastAPI</span><span>GPT-4.1</span><span>Supabase</span>
+        </div>
+      </div>
+      <div>
+        <div class="phone-mockup-group" style="margin-bottom:16px;">
+          <div class="phone-mockup">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <img src="portfolio-images/ticketmatch-main.PNG" alt="티켓매치 메인">
+            </div>
+          </div>
+          <div class="phone-mockup small">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <img src="portfolio-images/ticketmatch-detail.PNG" alt="티켓매치 상세">
+            </div>
+          </div>
+        </div>
+        <div class="web-mockup">
+          <div class="web-toolbar">
+            <div class="web-dot r"></div>
+            <div class="web-dot y"></div>
+            <div class="web-dot g"></div>
+            <div class="web-url">ticketmatch.kr/admin</div>
+          </div>
+          <img src="portfolio-images/ticketmatch-admin.PNG" alt="티켓매치 어드민">
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. THE 해커톤 -->
+    <div class="project-card reverse fade-up">
+      <div class="project-info">
+        <div class="project-tag event">국내 최대 빌더 해커톤 &mdash; 2026</div>
+        <h3>THE 해커톤 참가</h3>
+        <p>이준석 대표 / 토스 공동 창업자 / YC 유니콘 창업자 등 국내 최정상급 빌더들이 참가하는 초청형 해커톤.</p>
+        <div class="project-features">
+          <div class="project-feature"><span class="check">&#10003;</span> 국내 최대 규모 빌더 해커톤</div>
+          <div class="project-feature"><span class="check">&#10003;</span> 선발된 참가자만 참여하는 초청형</div>
+          <div class="project-feature"><span class="check">&#10003;</span> 빠른 프로토타이핑 &amp; 실전 문제 해결</div>
+        </div>
+        <div class="project-tech">
+          <span>해커톤</span><span>빌더 커뮤니티</span><span>프로토타이핑</span><span>AI</span>
+        </div>
+      </div>
+      <div>
+        <details style="max-width:100%;">
+          <summary style="cursor:pointer;color:#4f46e5;font-size:14px;font-weight:600;padding:14px 24px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:12px;list-style:none;display:flex;align-items:center;gap:8px;justify-content:center;transition:background 0.2s;">
+            <span style="font-size:16px">&#9654;</span> 참가 영상 보기
+          </summary>
+          <div style="margin-top:12px;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
+            <video controls playsinline poster="portfolio-images/the-hackathon-participants.png" style="width:100%;display:block;background:#000;" preload="metadata">
+              <source src="portfolio-images/the-hackathon.mp4" type="video/mp4">
+              <img src="portfolio-images/the-hackathon-participants.png" alt="THE 해커톤 참가자">
+            </video>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ Mid CTA ═══ -->
+<section class="mid-cta">
+  <h2 class="fade-up">이런 퀄리티, 우리가 만들어 드립니다</h2>
+  <p class="fade-up">무료 상담으로 프로젝트를 시작하세요. 견적부터 일정까지 안내해 드립니다.</p>
+  <a href="#contact" class="btn-white fade-up">무료 상담 신청 &rarr;</a>
+</section>
+
+<!-- ═══ Team ═══ -->
+<section class="team-section" id="team">
+  <div class="section-inner">
+    <div class="section-label fade-up">TEAM</div>
+    <div class="section-title fade-up">검증된 팀이 만듭니다</div>
+    <p class="section-desc fade-up">대규모 서비스 구축부터 AI 전문성까지 갖춘 엔지니어 팀.</p>
+    <div class="team-grid">
+      <div class="team-card fade-up">
+        <div class="role">Engineering Manager</div>
+        <h3>양승현</h3>
+        <div class="sub">쿠팡 출신 &middot; 풀스택 엔지니어</div>
+        <ul class="team-highlights">
+          <li>올웨이즈(Alwayz) — 700만 가입자, MAU 310만 이커머스 핵심 개발</li>
+          <li>머니워크 — 130만 MAU 헬스케어 앱, RAG 파이프라인 구축</li>
+          <li>Doeat — 한국 최초 개별 주문 무료 배달, 물류 시스템 구축</li>
+          <li>THE 해커톤 참가 — 국내 최정상급 빌더 해커톤</li>
+          <li>Trydayz CEO — 인플루언서 디지털 굿즈 플랫폼</li>
+        </ul>
+      </div>
+      <div class="team-card fade-up delay-1">
+        <div class="role">AI Research Engineer</div>
+        <h3>AI &amp; LLM 전문</h3>
+        <div class="sub">KAIST AI 석사 &middot; LLM/RAG 전문</div>
+        <ul class="team-highlights">
+          <li>프로덕션 RAG 시스템 — BM25 + Vector + Cross-Encoder</li>
+          <li>LLM 기반 서비스 다수 출시 경험</li>
+          <li>프롬프트 엔지니어링 &amp; Fine-tuning</li>
+          <li>Knowledge Graph (Neo4j) 설계 및 구축</li>
+          <li>건보공단 마이데이터 API 연동 경험</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Tech Stack ═══ -->
+<section class="stack-section" id="stack">
+  <div class="section-inner">
+    <div class="section-label fade-up">TECH STACK</div>
+    <div class="section-title fade-up">최신 기술 스택</div>
+    <p class="section-desc fade-up">검증된 기술로 안정적이고 확장 가능한 시스템을 구축합니다.</p>
+    <div class="stack-grid">
+      <div class="stack-card fade-up">
+        <div class="ico">&#9881;</div>
+        <h4>Next.js</h4>
+        <p>SSR/CSR 하이브리드<br>React, TypeScript</p>
+      </div>
+      <div class="stack-card fade-up delay-1">
+        <div class="ico">&#128640;</div>
+        <h4>FastAPI</h4>
+        <p>Python 비동기 백엔드<br>LLM/RAG 최적화</p>
+      </div>
+      <div class="stack-card fade-up delay-2">
+        <div class="ico">&#128451;</div>
+        <h4>PostgreSQL</h4>
+        <p>관계형 DB<br>pgvector 벡터 검색</p>
+      </div>
+      <div class="stack-card fade-up delay-3">
+        <div class="ico">&#129302;</div>
+        <h4>LLM / RAG</h4>
+        <p>Claude, GPT, Gemini<br>다중 모델 연동</p>
+      </div>
+      <div class="stack-card fade-up">
+        <div class="ico">&#128269;</div>
+        <h4>Vector DB</h4>
+        <p>Pinecone, Chroma<br>임베딩 검색</p>
+      </div>
+      <div class="stack-card fade-up delay-1">
+        <div class="ico">&#128200;</div>
+        <h4>Neo4j</h4>
+        <p>Graph DB<br>Knowledge Graph</p>
+      </div>
+      <div class="stack-card fade-up delay-2">
+        <div class="ico">&#128268;</div>
+        <h4>MERN Stack</h4>
+        <p>MongoDB, Express<br>React, Node.js</p>
+      </div>
+      <div class="stack-card fade-up delay-3">
+        <div class="ico">&#9729;</div>
+        <h4>AWS</h4>
+        <p>EC2, S3, CloudFront<br>인프라 &amp; CI/CD</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Contact ═══ -->
+<section class="contact-section" id="contact">
+  <div class="contact-inner">
+    <div class="contact-info fade-up">
+      <div class="section-label">CONTACT</div>
+      <h2>프로젝트,<br>함께 시작하세요</h2>
+      <p>무료 상담을 통해 프로젝트 범위, 일정, 비용을 안내해 드립니다. 부담 없이 연락 주세요.</p>
+      <div class="contact-benefits">
+        <div class="contact-benefit">
+          <div class="icon">&#9889;</div>
+          <span>24시간 내 답변 보장</span>
+        </div>
+        <div class="contact-benefit">
+          <div class="icon">&#128176;</div>
+          <span>무료 견적 및 일정 산출</span>
+        </div>
+        <div class="contact-benefit">
+          <div class="icon">&#128736;</div>
+          <span>6개월 무상 보수 포함</span>
+        </div>
+        <div class="contact-benefit">
+          <div class="icon">&#128172;</div>
+          <span>디자인 직접 제안 포함</span>
+        </div>
+      </div>
+    </div>
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(this.contentWindow.location.href !== 'about:blank') window.__formSubmitted && window.__formSubmitted();"></iframe>
+    <form class="contact-form fade-up" id="contactForm"
+          action="https://script.google.com/macros/s/AKfycbzhhN_7dwAoLlrBBHTgxFxI-gXvD2Tpkypebwy7bhO321Wz1UslY_gtMjkS_WQ1gGYsQg/exec"
+          method="POST" target="hidden_iframe">
+      <div class="form-group">
+        <label for="name">이름 / 회사명</label>
+        <input type="text" id="name" name="name" placeholder="홍길동 / (주)예시" required>
+      </div>
+      <div class="form-group">
+        <label for="contact">연락처 (전화 또는 이메일)</label>
+        <input type="text" id="contact" name="contact" placeholder="010-0000-0000 또는 email@example.com" required>
+      </div>
+      <div class="form-group">
+        <label for="projectType">프로젝트 유형</label>
+        <select id="projectType" name="projectType">
+          <option value="">선택해주세요</option>
+          <option value="shopping">쇼핑몰 · 이커머스</option>
+          <option value="ai">AI · LLM 서비스</option>
+          <option value="web">웹사이트 · 웹앱</option>
+          <option value="app">모바일 앱</option>
+          <option value="admin">어드민 · CMS</option>
+          <option value="mvp">MVP · 프로토타입</option>
+          <option value="other">기타</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="details">프로젝트 설명</label>
+        <textarea id="details" name="details" placeholder="만들고 싶은 서비스를 간단히 설명해 주세요. 예산, 일정 등 알려주시면 더 정확한 안내가 가능합니다." rows="4"></textarea>
+      </div>
+      <button type="submit" class="btn-submit">무료 상담 신청하기</button>
+      <p class="form-note">상담 신청 후 24시간 내 연락드립니다.</p>
+    </form>
+  </div>
+</section>
+
+<!-- ═══ Footer ═══ -->
+<footer>
+  <p>&copy; 2026 <span class="brand">원클릭사이트제작</span>. All rights reserved.</p>
+</footer>
+
+<!-- ═══ Scripts ═══ -->
+<script>
+// Fade-up animation
+(function() {
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.fade-up').forEach(function(el) {
+    observer.observe(el);
+  });
+})();
+
+// ═══ Google Apps Script 연동 설정 ═══
+// 1. Google Sheets에서 새 스프레드시트 생성
+// 2. 확장 프로그램 → Apps Script 열기
+// 3. 아래 코드를 Apps Script에 붙여넣기:
+//
+//   function doPost(e) {
+//     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+//     var data = JSON.parse(e.postData.contents);
+//     sheet.appendRow([
+//       new Date(),
+//       data.name,
+//       data.contact,
+//       data.projectType,
+//       data.details
+//     ]);
+//     return ContentService.createTextOutput(JSON.stringify({result: 'ok'}))
+//       .setMimeType(ContentService.MimeType.JSON);
+//   }
+//
+// 4. 배포 → 새 배포 → 웹 앱 → 액세스: 모든 사용자 → 배포
+// 5. 아래 GOOGLE_SCRIPT_URL을 배포 URL로 교체
+
+document.getElementById('contactForm').addEventListener('submit', function(e) {
+  var form = this;
+  var nameVal = form.name.value.trim();
+  var contactVal = form.contact.value.trim();
+
+  if (!nameVal || !contactVal) {
+    e.preventDefault();
+    alert('이름과 연락처를 입력해 주세요.');
+    return;
+  }
+
+  // form은 hidden iframe으로 자동 제출됨 (target="hidden_iframe")
+  var btn = form.querySelector('.btn-submit');
+  var originalText = btn.textContent;
+  btn.textContent = '전송 중...';
+  btn.disabled = true;
+
+  window.__formSubmitted = function() {
+    btn.textContent = '신청 완료!';
+    btn.style.background = '#059669';
+    setTimeout(function() {
+      btn.textContent = originalText;
+      btn.style.background = '';
+      btn.disabled = false;
+      form.reset();
+    }, 3000);
+    window.__formSubmitted = null;
+  };
+
+  // iframe onload 실패 대비 타임아웃 폴백
+  setTimeout(function() {
+    if (btn.textContent === '전송 중...') {
+      btn.textContent = '신청 완료!';
+      btn.style.background = '#059669';
+      setTimeout(function() {
+        btn.textContent = originalText;
+        btn.style.background = '';
+        btn.disabled = false;
+        form.reset();
+      }, 3000);
+    }
+  }, 3000);
+});
+
+// Smooth scroll for nav links
+document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    var target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+// Nav background on scroll
+(function() {
+  var nav = document.querySelector('.nav');
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 50) {
+      nav.style.boxShadow = '0 1px 12px rgba(0,0,0,0.06)';
+    } else {
+      nav.style.boxShadow = 'none';
+    }
+  });
+})();
+</script>
+</body>
+</html>
