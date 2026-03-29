@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>전자담배몰 독립몰 전환 제안서 — 원클릭사이트제작</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { sans: ['Noto Sans KR', 'sans-serif'] },
+        colors: {
+          navy: { 50:'#eff6ff', 100:'#dbeafe', 200:'#bfdbfe', 300:'#93c5fd', 400:'#60a5fa', 500:'#3b82f6', 600:'#2563eb', 700:'#1d4ed8', 800:'#1e3a5f', 900:'#172554', 950:'#0f1729' },
+          teal: '#14b8a6', light: '#f8fafc', dark: '#0f172a',
+          amber: { 400:'#fbbf24', 500:'#f59e0b' },
+          red: { 400:'#f87171', 500:'#ef4444' },
+          green: { 400:'#4ade80', 500:'#22c55e' }
+        }
+      }
+    }
+  }
+</script>
+<style>
+  :root {
+    --c50:#eff6ff; --c100:#dbeafe; --c200:#bfdbfe; --c300:#93c5fd; --c400:#60a5fa;
+    --c500:#3b82f6; --c600:#2563eb; --c700:#1d4ed8; --c800:#1e3a5f; --c900:#172554; --c950:#0f1729;
+    --teal:#14b8a6; --light-bg:#f8fafc; --dark:#0f172a;
+    --amber:#f59e0b; --red:#ef4444; --green:#22c55e;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; font-family:'Noto Sans KR',sans-serif; background:var(--c950); overflow:hidden; height:100%; }
+  #deck { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; }
+  .slide { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0; transform:translateX(60px); transition:opacity .45s cubic-bezier(.4,0,.2,1), transform .45s cubic-bezier(.4,0,.2,1); pointer-events:none; overflow:hidden; }
+  .slide.active { opacity:1; transform:translateX(0); pointer-events:auto; }
+  .slide.prev { opacity:0; transform:translateX(-60px); }
+  #progress-bar { position:fixed; top:0; left:0; height:3px; background:linear-gradient(90deg,var(--c400),var(--red)); transition:width .4s ease; z-index:100; box-shadow:0 0 8px rgba(239,68,68,0.4); }
+  #nav { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:16px; z-index:100; background:rgba(15,23,41,.85); backdrop-filter:blur(12px); padding:8px 20px; border-radius:99px; border:1px solid rgba(255,255,255,.1); }
+  .nav-btn { width:44px; height:44px; border-radius:50%; border:1.5px solid rgba(255,255,255,.25); background:rgba(255,255,255,.08); backdrop-filter:blur(12px); color:#fff; font-size:18px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .2s, border-color .2s, transform .15s; }
+  .nav-btn:hover { background:rgba(255,255,255,.18); border-color:rgba(255,255,255,.5); transform:scale(1.08); }
+  .nav-btn:active { transform:scale(.95); }
+  #counter { color:rgba(255,255,255,.7); font-size:13px; font-weight:500; min-width:56px; text-align:center; letter-spacing:.5px; }
+  .slide-inner { width:100vw; height:100vh; display:flex; flex-direction:column; position:relative; }
+  .section-pill { display:inline-block; padding:6px 18px; border-radius:99px; font-size:13px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; }
+  .heading-line { display:inline-block; position:relative; }
+  .heading-line::after { content:''; position:absolute; left:0; bottom:-4px; height:3px; width:100%; background:linear-gradient(90deg,var(--red),var(--c400)); border-radius:2px; }
+  .scroll-content { overflow-y:auto; flex:1; padding-bottom:60px; }
+  .scroll-content::-webkit-scrollbar { width:4px; }
+  .scroll-content::-webkit-scrollbar-track { background:transparent; }
+  .scroll-content::-webkit-scrollbar-thumb { background:rgba(255,255,255,.2); border-radius:4px; }
+  .badge { display:inline-block; padding:3px 10px; border-radius:4px; font-size:11px; font-weight:700; letter-spacing:.5px; }
+  .badge-urgent { background:#ef4444; color:#fff; }
+  .badge-important { background:#f59e0b; color:#fff; }
+  .badge-normal { background:var(--c400); color:#fff; }
+  .card-dark { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:16px; padding:20px; }
+  .card-dark:hover { background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.2); }
+  .card-light { background:#fff; border:1.5px solid var(--c200); border-radius:16px; padding:20px; box-shadow:0 4px 24px rgba(30,58,95,0.06); }
+  @media (max-width:768px) {
+    .slide-inner { padding:16px !important; }
+    .grid.grid-cols-3 { grid-template-columns:repeat(2,1fr) !important; }
+    .grid.grid-cols-2 { grid-template-columns:1fr !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+<div id="deck">
+
+<!-- SLIDE 1: Title -->
+<div class="slide active" id="s1">
+  <div class="slide-inner" style="background:linear-gradient(145deg,var(--c950) 0%,#1a1020 40%,var(--c900) 100%);">
+    <div class="flex flex-col items-center justify-center flex-1 text-center px-8">
+      <div class="mb-4" style="font-size:72px;filter:drop-shadow(0 0 24px rgba(239,68,68,0.3))">&#x1F6A8;</div>
+      <div class="section-pill mb-5" style="background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3)">
+        긴급 제안 &middot; D-26
+      </div>
+      <h1 class="font-black text-white mb-3" style="font-size:clamp(2rem,5vw,3.6rem);line-height:1.1;letter-spacing:-1px;">
+        전자담배몰 독립몰 전환<br><span style="color:var(--c400)">지금이 마지막 기회입니다</span>
+      </h1>
+      <p class="font-light mb-2" style="font-size:clamp(.85rem,2vw,1.1rem);color:var(--c300);letter-spacing:1px;">
+        2026.04.24 온라인 판매 규제 시행 전, Cafe24/아임웹에서 탈출하세요
+      </p>
+      <div class="mt-3 h-px w-48" style="background:linear-gradient(90deg,transparent,var(--red),transparent)"></div>
+      <p class="mt-5 text-sm" style="color:rgba(255,255,255,.4);">원클릭사이트제작 &middot; Cafe24/아임웹 이관 전문팀</p>
+    </div>
+    <div class="flex justify-center pb-20 gap-10">
+      <div class="text-center"><div class="text-xl font-black" style="color:var(--red)">D-26</div><div class="text-xs mt-1" style="color:rgba(255,255,255,.5)">규제 시행까지</div></div>
+      <div class="text-center"><div class="text-xl font-black" style="color:var(--c400)">700만원</div><div class="text-xs mt-1" style="color:rgba(255,255,255,.5)">이관 비용</div></div>
+      <div class="text-center"><div class="text-xl font-black" style="color:var(--c400)">14일</div><div class="text-xs mt-1" style="color:rgba(255,255,255,.5)">완성 기간</div></div>
+      <div class="text-center"><div class="text-xl font-black" style="color:var(--green)">Polar PG</div><div class="text-xs mt-1" style="color:rgba(255,255,255,.5)">결제 솔루션</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 2: 왜 지금인가 -->
+<div class="slide" id="s2">
+  <div class="slide-inner" style="background:linear-gradient(135deg,var(--c950) 0%,var(--c800) 100%);">
+    <div class="flex flex-col justify-center flex-1 px-14 pb-8 pt-10">
+      <div class="section-pill mb-6" style="background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3)">긴급 현황</div>
+      <h2 class="font-black text-white mb-8" style="font-size:clamp(1.6rem,3vw,2.4rem);line-height:1.15;">
+        <span class="heading-line">2026년 4월 24일, 게임이 바뀝니다</span>
+      </h2>
+
+      <div class="grid grid-cols-2 gap-6 mb-6">
+        <div>
+          <div class="card-dark mb-4" style="border-color:rgba(239,68,68,.3);">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="badge badge-urgent">법률 확정</span>
+              <span class="text-xs" style="color:rgba(255,255,255,.5)">2025.12.02 국회 통과</span>
+            </div>
+            <h3 class="font-bold text-white text-lg mb-2">담배사업법 개정안</h3>
+            <p class="text-sm" style="color:rgba(255,255,255,.7);line-height:1.7">
+              담배 정의 <b>37년 만에 변경</b>.<br>
+              합성니코틴 포함 모든 니코틴 제품이<br>
+              <b style="color:#fca5a5">온라인 판매 전면 금지</b>됩니다.
+            </p>
+          </div>
+          <div class="card-dark">
+            <h3 class="font-bold text-sm mb-2" style="color:var(--c300)">4/24 이후 온라인 판매 가능 품목</h3>
+            <div class="space-y-2 text-sm">
+              <div class="flex items-center gap-2" style="color:#86efac"><span>&#10003;</span> 전자담배 기기 (디바이스)</div>
+              <div class="flex items-center gap-2" style="color:#86efac"><span>&#10003;</span> 무니코틴 액상</div>
+              <div class="flex items-center gap-2" style="color:#86efac"><span>&#10003;</span> 액세서리/부품 (코일, 탱크 등)</div>
+              <div class="flex items-center gap-2" style="color:#fca5a5"><span>&#10007;</span> 니코틴 액상 (불가)</div>
+              <div class="flex items-center gap-2" style="color:#fca5a5"><span>&#10007;</span> 합성니코틴 액상 (불가)</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card-dark mb-4" style="border-color:rgba(245,158,11,.3);">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="badge badge-important">경고</span>
+            </div>
+            <h3 class="font-bold text-white text-lg mb-2">Cafe24/아임웹 사이트 삭제 위험</h3>
+            <p class="text-sm" style="color:rgba(255,255,255,.7);line-height:1.7">
+              4/24 이후 Cafe24, 아임웹에서<br>
+              <b style="color:#fde047">전자담배 판매 사이트가 삭제</b>될 수 있습니다.<br><br>
+              플랫폼 정책상 규제 업종 사이트를<br>
+              일괄 제한/삭제하는 것이 일반적입니다.
+            </p>
+          </div>
+          <div class="card-dark">
+            <h3 class="font-bold text-sm mb-2" style="color:var(--c300)">카카오 정책도 변경 (4/20)</h3>
+            <p class="text-sm" style="color:rgba(255,255,255,.6);line-height:1.6">
+              카카오디벨로퍼스 운영정책 개정으로 전자담배 서비스 <b style="color:rgba(255,255,255,.9)">원칙적 금지</b>. 카카오 로그인, 알림톡 차단 가능.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-xl p-4" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);">
+        <p class="text-sm text-center" style="color:rgba(255,255,255,.9)">
+          <b style="color:#fca5a5">결론:</b> 기기 + 액세서리 + 무니코틴 액상 전문몰로의 전환이 불가피합니다. 이 전환은 <b>자사몰(독립몰)</b>에서만 가능합니다.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3: SaaS 한계 -->
+<div class="slide" id="s3">
+  <div class="slide-inner" style="background:var(--light-bg);">
+    <div class="flex items-center px-14 pt-10 pb-0 shrink-0">
+      <div class="section-pill" style="background:rgba(239,68,68,.1);color:#dc2626;border:1px solid rgba(239,68,68,.2)">현황 분석</div>
+    </div>
+    <div class="flex flex-col justify-center flex-1 px-14 pb-8">
+      <h2 class="font-black mb-6" style="font-size:clamp(1.5rem,3vw,2.2rem);color:var(--c800);line-height:1.15;">
+        <span class="heading-line">Cafe24/아임웹, 왜 떠나야 하는가</span>
+      </h2>
+      <div class="grid grid-cols-2 gap-5">
+        <div class="card-light" style="border-color:rgba(239,68,68,.3);">
+          <div class="flex items-center gap-2 mb-2">
+            <span style="font-size:24px">&#128274;</span>
+            <h3 class="font-bold" style="color:var(--c800)">PG 결제 거절 위험</h3>
+          </div>
+          <p class="text-sm" style="color:#374151;line-height:1.7">전자담배는 PG사에서 <b>"고위험 업종"</b>으로 분류. Cafe24는 단일 PG만 연동 가능하여 거절 시 <b>결제 자체가 불가</b>합니다.</p>
+          <div class="mt-2 px-3 py-1.5 rounded-lg text-xs font-bold" style="background:rgba(34,197,94,.1);color:#16a34a;display:inline-block">
+            &#10003; 자사몰: Polar(해외 PG) 연동으로 해결
+          </div>
+        </div>
+        <div class="card-light" style="border-color:rgba(245,158,11,.3);">
+          <div class="flex items-center gap-2 mb-2">
+            <span style="font-size:24px">&#128100;</span>
+            <h3 class="font-bold" style="color:var(--c800)">성인인증 커스텀 불가</h3>
+          </div>
+          <p class="text-sm" style="color:#374151;line-height:1.7">19+ Age Gate UI 변경 불가. 아임웹은 사이트 진입 단계 게이트 페이지 <b>기본 미지원</b>. 구매 단계에서만 작동.</p>
+          <div class="mt-2 px-3 py-1.5 rounded-lg text-xs font-bold" style="background:rgba(34,197,94,.1);color:#16a34a;display:inline-block">
+            &#10003; 자사몰: 완전 커스텀 인증 플로우
+          </div>
+        </div>
+        <div class="card-light" style="border-color:rgba(59,130,246,.3);">
+          <div class="flex items-center gap-2 mb-2">
+            <span style="font-size:24px">&#128200;</span>
+            <h3 class="font-bold" style="color:var(--c800)">SEO/마케팅 제한</h3>
+          </div>
+          <p class="text-sm" style="color:#374151;line-height:1.7">전자담배 <b>광고 전면 금지</b> 환경에서 자연검색이 유일한 마케팅 채널. 아임웹 SEO는 <b>"쥐약"</b>이라는 업계 평가.</p>
+          <div class="mt-2 px-3 py-1.5 rounded-lg text-xs font-bold" style="background:rgba(34,197,94,.1);color:#16a34a;display:inline-block">
+            &#10003; 자사몰: SEO 완전 통제, 검색 유입 극대화
+          </div>
+        </div>
+        <div class="card-light" style="border-color:rgba(239,68,68,.3);">
+          <div class="flex items-center gap-2 mb-2">
+            <span style="font-size:24px">&#9888;&#65039;</span>
+            <h3 class="font-bold" style="color:var(--c800)">규제 대응 불가</h3>
+          </div>
+          <p class="text-sm" style="color:#374151;line-height:1.7">법규 변경 시 카테고리 재구성, 판매 프로세스 변경, 경고문구 자동화 등을 SaaS에서는 <b>즉시 대응 불가</b>.</p>
+          <div class="mt-2 px-3 py-1.5 rounded-lg text-xs font-bold" style="background:rgba(34,197,94,.1);color:#16a34a;display:inline-block">
+            &#10003; 자사몰: 코드 레벨 즉각 대응
+          </div>
+        </div>
+      </div>
+      <div class="mt-4 rounded-xl p-4 text-center" style="background:var(--c800);">
+        <p class="text-sm" style="color:var(--c300)">현재 전자담배몰의 <b class="text-white" style="font-size:18px">94.7%</b>가 SaaS에 의존하고 있습니다. 규제 변화에 가장 취약한 구조입니다.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4: 팀 소개 -->
+<div class="slide" id="s4">
+  <div class="slide-inner" style="background:var(--light-bg);">
+    <div class="flex items-center px-14 pt-10 pb-0 shrink-0">
+      <div class="section-pill" style="background:var(--c100);color:var(--c800);border:1px solid var(--c200)">팀 소개</div>
+    </div>
+    <div class="flex flex-col justify-center flex-1 px-14 pb-8">
+      <h2 class="font-black mb-6" style="font-size:clamp(1.5rem,3vw,2.2rem);color:var(--c800);line-height:1.15;">
+        <span class="heading-line">원클릭사이트제작 소개</span>
+      </h2>
+      <div class="grid grid-cols-2 gap-6">
+        <div>
+          <p class="text-sm mb-4" style="color:#374151;line-height:1.8">
+            저희는 <b>쿠팡/토스 출신 개발자</b>들로 구성된 쇼핑몰 이관 전문팀입니다.
+            <b>Cafe24, 아임웹에서 독립몰로의 이관</b>을 전문으로 하며,
+            이미 전자담배 쇼핑몰을 포함한 다수의 이관 프로젝트를 성공적으로 완료했습니다.
+          </p>
+          <div class="rounded-xl p-3 mb-4" style="background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(59,130,246,.08));border:1.5px solid rgba(34,197,94,.25);">
+            <div class="flex items-center gap-2 mb-1">
+              <span>&#128737;</span>
+              <span class="text-sm font-bold" style="color:#16a34a">6개월 무상 보수 보장</span>
+            </div>
+            <p class="text-xs" style="color:#374151">납품 후 <b>6개월간 무상 유지보수</b>. 버그 수정, 기능 개선, 운영 이슈 — 추가 비용 없이 저희가 책임집니다.</p>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <div class="rounded-xl p-3 text-center" style="background:#fff;border:1.5px solid var(--c200);">
+              <div class="text-xl font-black" style="color:var(--c600)">700만명</div>
+              <div class="text-xs mt-1" style="color:#6b7280">이 사용하는 서비스를<br>만든 경험</div>
+            </div>
+            <div class="rounded-xl p-3 text-center" style="background:#fff;border:1.5px solid var(--c200);">
+              <div class="text-xl font-black" style="color:var(--c600)">530억</div>
+              <div class="text-xs mt-1" style="color:#6b7280">연간 매출 처리<br>시스템 구축 경험</div>
+            </div>
+            <div class="rounded-xl p-3 text-center" style="background:#fff;border:1.5px solid var(--c200);">
+              <div class="text-xl font-black" style="color:var(--c600)">15년+</div>
+              <div class="text-xs mt-1" style="color:#6b7280">쇼핑몰 개발 경력<br>(팀 리드)</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h3 class="font-bold text-sm mb-3" style="color:var(--c800)">전자담배몰 이관 실적</h3>
+          <div class="space-y-2 mb-4">
+            <a href="https://www.drbrid.co.kr/" target="_blank" class="flex items-center gap-3 rounded-lg p-3 block" style="background:#fff;border:1px solid var(--c200);text-decoration:none;">
+              <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs font-black shrink-0" style="background:#22c55e;color:#fff">&#10003;</div>
+              <div><div class="text-sm font-bold" style="color:var(--c800)">Dr.BRID C (화장품)</div><div class="text-xs" style="color:#6b7280">Cafe24 이관 &middot; <b style="color:#22c55e">완료</b></div></div>
+            </a>
+            <a href="https://felixlab-demo.vercel.app/" target="_blank" class="flex items-center gap-3 rounded-lg p-3 block" style="background:#fff;border:1px solid rgba(245,158,11,.3);text-decoration:none;">
+              <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs font-black shrink-0" style="background:#f59e0b;color:#fff">&#9679;</div>
+              <div><div class="text-sm font-bold" style="color:var(--c800)">FELIX LAB (전자담배)</div><div class="text-xs" style="color:#6b7280">Cafe24 이관 &middot; <b style="color:#f59e0b">논의 중</b></div></div>
+            </a>
+          </div>
+          <h3 class="font-bold text-sm mb-2" style="color:var(--c800)">전담 팀 (6명)</h3>
+          <div class="space-y-1.5">
+            <div class="flex items-center gap-2 rounded-lg p-2 text-xs" style="background:#fff;border:1px solid var(--c200);">
+              <div class="w-7 h-7 rounded-full flex items-center justify-center font-black shrink-0" style="background:var(--c400);color:var(--c950);font-size:10px">J</div>
+              <div><b>Jamie (양승현)</b> &middot; 프로젝트 리드 &middot; 고려대</div>
+            </div>
+            <div class="flex items-center gap-2 rounded-lg p-2 text-xs" style="background:#fff;border:1px solid var(--c200);">
+              <div class="w-7 h-7 rounded-full flex items-center justify-center font-black shrink-0" style="background:var(--c400);color:var(--c950);font-size:10px">T</div>
+              <div><b>Tom</b> &middot; 시스템 설계 &middot; KAIST &middot; <b style="color:var(--c600)">前 쿠팡 개발팀 리더</b></div>
+            </div>
+            <div class="flex items-center gap-2 rounded-lg p-2 text-xs" style="background:#fff;border:1px solid var(--c200);">
+              <div class="w-7 h-7 rounded-full flex items-center justify-center font-black shrink-0" style="background:var(--c400);color:var(--c950);font-size:10px">+4</div>
+              <div><b>Joon &middot; Sera &middot; Daniel &middot; Grace</b> &middot; 데이터/디자인/결제/QA</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 5: 이관 프로세스 -->
+<div class="slide" id="s5">
+  <div class="slide-inner" style="background:linear-gradient(135deg,var(--c950) 0%,var(--c800) 100%);">
+    <div class="flex flex-col justify-center flex-1 px-14 pb-8 pt-10">
+      <div class="section-pill mb-6" style="background:rgba(96,165,250,.15);color:var(--c300);border:1px solid rgba(96,165,250,.3)">이관 프로세스</div>
+      <h2 class="font-black text-white mb-8" style="font-size:clamp(1.5rem,3vw,2.2rem);line-height:1.15;">
+        <span class="heading-line">14일 완성 — 이관 로드맵</span>
+      </h2>
+      <div class="grid grid-cols-2 gap-5">
+        <div>
+          <div class="card-dark mb-4">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center font-black text-sm" style="background:var(--c400);color:var(--c950)">1</div>
+              <div>
+                <div class="font-bold text-white">데이터 추출 (Day 1-2)</div>
+              </div>
+            </div>
+            <div class="space-y-1.5 text-sm" style="color:rgba(255,255,255,.7)">
+              <div class="flex items-start gap-2"><span style="color:var(--teal)">&#10003;</span> 회원 DB 추출 (이름, 이메일, 연락처, 등급)</div>
+              <div class="flex items-start gap-2"><span style="color:var(--teal)">&#10003;</span> 상품 DB 추출 (이미지, 가격, 옵션, 재고)</div>
+              <div class="flex items-start gap-2"><span style="color:var(--teal)">&#10003;</span> 주문/배송 내역 추출</div>
+              <div class="flex items-start gap-2"><span style="color:var(--teal)">&#10003;</span> 상품 이미지 전체 자동 크롤링</div>
+            </div>
+          </div>
+          <div class="card-dark mb-4">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center font-black text-sm" style="background:var(--c400);color:var(--c950)">2</div>
+              <div>
+                <div class="font-bold text-white">쇼핑몰 구축 (Day 3-10)</div>
+              </div>
+            </div>
+            <div class="space-y-1.5 text-sm" style="color:rgba(255,255,255,.7)">
+              <div class="flex items-start gap-2"><span style="color:var(--teal)">&#10003;</span> 기존 디자인 기반 신규 쇼핑몰 제작</div>
+              <div class="flex items-start gap-2"><span style="color:var(--teal)">&#10003;</span> 19+ 성인인증 게이트 페이지 구현</div>
+              <div class="flex items-start gap-2"><span style="color:var(--teal)">&#10003;</span> 결제 시스템 연동 (Polar PG)</div>
+              <div class="flex items-start gap-2"><span style="color:var(--teal)">&#10003;</span> 회원가입/로그인/마이페이지</div>
+              <div class="flex items-start gap-2"><span style="color:var(--teal)">&#10003;</span> 장바구니/주문/배송 추적</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card-dark mb-4">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center font-black text-sm" style="background:var(--c400);color:var(--c950)">3</div>
+              <div>
+                <div class="font-bold text-white">어드민 구축 (Day 7-12)</div>
+              </div>
+            </div>
+            <div class="space-y-1.5 text-sm" style="color:rgba(255,255,255,.7)">
+              <div class="flex items-start gap-2"><span style="color:var(--teal)">&#10003;</span> 상품 등록/수정/삭제 관리</div>
+              <div class="flex items-start gap-2"><span style="color:var(--teal)">&#10003;</span> 주문/배송 관리 (상태 변경, 송장 입력)</div>
+              <div class="flex items-start gap-2"><span style="color:var(--teal)">&#10003;</span> 회원 관리 (등급, 적립금, 쿠폰)</div>
+              <div class="flex items-start gap-2"><span style="color:var(--teal)">&#10003;</span> 매출/통계 대시보드</div>
+              <div class="flex items-start gap-2"><span style="color:var(--teal)">&#10003;</span> <b style="color:var(--c300)">필요한 어드민 기능 모두 구축</b></div>
+            </div>
+          </div>
+          <div class="card-dark">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center font-black text-sm" style="background:var(--green);color:#fff">4</div>
+              <div>
+                <div class="font-bold text-white">테스트 & 오픈 (Day 12-14)</div>
+              </div>
+            </div>
+            <div class="space-y-1.5 text-sm" style="color:rgba(255,255,255,.7)">
+              <div class="flex items-start gap-2"><span style="color:var(--teal)">&#10003;</span> 전체 기능 테스트 (결제/배송/인증)</div>
+              <div class="flex items-start gap-2"><span style="color:var(--teal)">&#10003;</span> 도메인 연결 & SSL 설정</div>
+              <div class="flex items-start gap-2"><span style="color:var(--teal)">&#10003;</span> 데이터 최종 동기화</div>
+              <div class="flex items-start gap-2"><span style="color:var(--green)">&#9733;</span> <b style="color:#86efac">사이트 오픈!</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 6: 가격 & Polar PG -->
+<div class="slide" id="s6">
+  <div class="slide-inner" style="background:var(--light-bg);">
+    <div class="flex items-center px-14 pt-10 pb-0 shrink-0">
+      <div class="section-pill" style="background:var(--c100);color:var(--c800);border:1px solid var(--c200)">견적 & 결제 솔루션</div>
+    </div>
+    <div class="flex flex-col justify-center flex-1 px-14 pb-8">
+      <h2 class="font-black mb-8" style="font-size:clamp(1.5rem,3vw,2.2rem);color:var(--c800);line-height:1.15;">
+        <span class="heading-line">700만원, 14일. 모든 것을 포함합니다.</span>
+      </h2>
+      <div class="grid grid-cols-2 gap-6">
+        <div>
+          <div class="card-light mb-4" style="border-color:var(--c400);">
+            <div class="text-center mb-4">
+              <div class="text-4xl font-black" style="color:var(--c600)">700만원</div>
+              <div class="text-sm mt-1" style="color:#6b7280">VAT 별도 &middot; 전체 이관 비용</div>
+            </div>
+            <div class="space-y-2 text-sm" style="color:#374151">
+              <div class="flex items-start gap-2"><span style="color:#22c55e">&#10003;</span> Cafe24/아임웹 데이터 완전 이관</div>
+              <div class="flex items-start gap-2"><span style="color:#22c55e">&#10003;</span> 독립 쇼핑몰 신규 구축</div>
+              <div class="flex items-start gap-2"><span style="color:#22c55e">&#10003;</span> 어드민 페이지 전체 구축</div>
+              <div class="flex items-start gap-2"><span style="color:#22c55e">&#10003;</span> 19+ 성인인증 시스템</div>
+              <div class="flex items-start gap-2"><span style="color:#22c55e">&#10003;</span> Polar PG 결제 연동</div>
+              <div class="flex items-start gap-2"><span style="color:#22c55e">&#10003;</span> SEO 기본 세팅</div>
+              <div class="flex items-start gap-2"><span style="color:#22c55e">&#10003;</span> <b>6개월 무상 보수</b></div>
+            </div>
+            <div class="mt-4 p-3 rounded-lg text-center" style="background:linear-gradient(135deg,rgba(34,197,94,.1),rgba(59,130,246,.1));border:1px solid rgba(34,197,94,.2);">
+              <p class="text-xs font-bold" style="color:#16a34a">14일 후 바로 운영 가능한 독립 쇼핑몰</p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card-light mb-4" style="border-color:rgba(139,92,246,.3);">
+            <div class="flex items-center gap-2 mb-3">
+              <span style="font-size:24px">&#128179;</span>
+              <h3 class="font-bold" style="color:var(--c800)">Polar PG — 결제 문제 해결</h3>
+            </div>
+            <p class="text-sm mb-3" style="color:#374151;line-height:1.7">
+              국내 PG사에서 전자담배 업종 <b>결제 거절</b>을 당하셨나요?<br>
+              <b style="color:#7c3aed">Polar</b>는 해외 PG사로, 전자담배 업종도 결제 연동이 가능합니다.
+            </p>
+            <div class="space-y-2 text-sm">
+              <div class="flex items-start gap-2" style="color:#374151"><span style="color:#7c3aed">&#10003;</span> 해외 PG 연동 (전자담배 업종 가능)</div>
+              <div class="flex items-start gap-2" style="color:#374151"><span style="color:#7c3aed">&#10003;</span> 신용카드/체크카드 결제 지원</div>
+              <div class="flex items-start gap-2" style="color:#374151"><span style="color:#7c3aed">&#10003;</span> 저희가 연동부터 셋업까지 도움</div>
+            </div>
+          </div>
+          <div class="card-light">
+            <h3 class="font-bold text-sm mb-3" style="color:var(--c800)">타 업종 자사몰 전환 성과</h3>
+            <div class="space-y-2">
+              <div class="flex justify-between text-sm" style="color:#374151">
+                <span>정관장몰</span>
+                <span class="font-bold" style="color:var(--c600)">매출 10배+ (33억&rarr;346억)</span>
+              </div>
+              <div class="flex justify-between text-sm" style="color:#374151">
+                <span>젝시믹스</span>
+                <span class="font-bold" style="color:var(--c600)">재구매율 70%</span>
+              </div>
+              <div class="flex justify-between text-sm" style="color:#374151">
+                <span>수수료 절감</span>
+                <span class="font-bold" style="color:#22c55e">25~30% &rarr; 2~3%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: 상세 이관 프로세스 -->
+<div class="slide" id="s7">
+  <div class="slide-inner" style="background:linear-gradient(135deg,var(--c950) 0%,var(--c800) 100%);">
+    <div class="flex flex-col flex-1 px-14 pb-16 pt-8">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="section-pill" style="background:rgba(20,184,166,.15);color:#5eead4;border:1px solid rgba(20,184,166,.3)">상세 이관 프로세스</div>
+        <span class="badge badge-normal">DETAIL</span>
+      </div>
+      <h2 class="font-black text-white mb-5" style="font-size:clamp(1.3rem,2.5vw,1.9rem);line-height:1.15;">
+        <span class="heading-line">데이터 이관, 이렇게 진행됩니다</span>
+      </h2>
+      <div class="scroll-content">
+        <div class="grid grid-cols-2 gap-5">
+          <!-- 왼쪽: 저희가 해드리는 것 -->
+          <div>
+            <div class="flex items-center gap-2 mb-3" style="color:#22c55e;font-weight:700;font-size:15px;">
+              <span style="font-size:18px">&#10003;</span> 저희가 처리하는 것
+            </div>
+            <div class="rounded-xl p-4" style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);">
+              <div class="space-y-3 text-sm" style="color:rgba(255,255,255,.85)">
+                <div class="flex items-start gap-2"><span style="color:#22c55e;font-weight:700">&#10003;</span> <span><b>회원/상품/주문 데이터:</b> Cafe24/아임웹에서 자동 추출 &rarr; 새 시스템으로 이관</span></div>
+                <div class="flex items-start gap-2"><span style="color:#22c55e;font-weight:700">&#10003;</span> <span><b>상품 사진:</b> 자동 다운로드 &rarr; 새 이미지 저장소로 이관 (해지 전 먼저 수집)</span></div>
+                <div class="flex items-start gap-2"><span style="color:#22c55e;font-weight:700">&#10003;</span> <span><b>비밀번호:</b> 이전 불가 &rarr; 임시 비밀번호 발급 + 재설정 안내까지 세팅</span></div>
+                <div class="flex items-start gap-2"><span style="color:#22c55e;font-weight:700">&#10003;</span> <span><b>포인트/등급/위시리스트:</b> 자동 추출하여 이관</span></div>
+                <div class="flex items-start gap-2"><span style="color:#22c55e;font-weight:700">&#10003;</span> <span><b>결제 이전:</b> 새 PG 가맹점 등록 접수 (심사 서류도 저희가 준비)</span></div>
+                <div class="flex items-start gap-2"><span style="color:#22c55e;font-weight:700">&#10003;</span> <span><b>도메인 이전:</b> 인증번호 발급 &rarr; 주소 이전 일괄 진행</span></div>
+                <div class="flex items-start gap-2"><span style="color:#22c55e;font-weight:700">&#10003;</span> <span><b>보안 인증서:</b> 무료 SSL 새로 발급 (자물쇠 마크)</span></div>
+                <div class="flex items-start gap-2"><span style="color:#22c55e;font-weight:700">&#10003;</span> <span><b>배송 연동:</b> 우체국/CJ대한통운 택배 API 연동</span></div>
+                <div class="flex items-start gap-2"><span style="color:#22c55e;font-weight:700">&#10003;</span> <span><b>알림 세팅:</b> 주문확인/배송 알림 (카카오 알림톡 or SMS)</span></div>
+              </div>
+            </div>
+          </div>
+          <!-- 오른쪽: 대표님께 필요한 것 -->
+          <div>
+            <div class="flex items-center gap-2 mb-3" style="color:var(--c400);font-weight:700;font-size:15px;">
+              <span style="font-size:16px">&#128203;</span> 대표님께 필요한 것
+            </div>
+            <div class="rounded-xl p-4" style="background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.2);">
+              <div class="space-y-3 text-sm" style="color:rgba(255,255,255,.85)">
+                <div class="flex items-start gap-2"><span style="color:var(--c400)">&#9744;</span> <span>Cafe24/아임웹 관리자 로그인 정보 공유</span></div>
+                <div class="flex items-start gap-2"><span style="color:var(--c400)">&#9744;</span> <span>회원 수 / 상품 수 (이관 규모 파악)</span></div>
+                <div class="flex items-start gap-2"><span style="color:var(--c400)">&#9744;</span> <span>현재 카드결제 회사 이름</span></div>
+                <div class="flex items-start gap-2"><span style="color:var(--c400)">&#9744;</span> <span>사업자등록증, 통신판매업 신고증</span></div>
+                <div class="flex items-start gap-2"><span style="color:var(--c400)">&#9744;</span> <span>도메인 구매처 (Cafe24/아임웹 vs 가비아/후이즈)</span></div>
+                <div class="flex items-start gap-2"><span style="color:var(--c400)">&#9744;</span> <span>로고/브랜드 컬러 파일 (없어도 OK)</span></div>
+              </div>
+            </div>
+            <div class="rounded-lg p-3 mt-3" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);">
+              <p class="text-xs" style="color:rgba(255,255,255,.7)"><b style="color:#fca5a5">참고:</b> PG 심사 1~2주 소요 &mdash; 14일 일정의 최대 병목. 미팅 직후 심사 접수가 필요합니다. 저희가 바로 접수합니다.</p>
+            </div>
+            <div class="rounded-lg p-3 mt-2" style="background:rgba(20,184,166,.08);border:1px solid rgba(20,184,166,.2);">
+              <p class="text-xs" style="color:rgba(255,255,255,.7)"><b style="color:#5eead4">안심:</b> 로그인 정보만 공유해주시면 <b>데이터 추출 도구를 이미 준비</b>해 두었습니다. 저희가 전부 처리합니다.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8: 연락처/CTA -->
+<div class="slide" id="s8">
+  <div class="slide-inner" style="background:linear-gradient(145deg,var(--c950) 0%,#1a1020 40%,var(--c900) 100%);">
+    <div class="flex flex-col items-center justify-center flex-1 text-center px-8">
+      <div class="mb-6" style="font-size:64px">&#128222;</div>
+      <h2 class="font-black text-white mb-4" style="font-size:clamp(1.8rem,4vw,3rem);line-height:1.15;">
+        4월 24일 전에<br><span style="color:var(--c400)">지금 바로 시작하세요</span>
+      </h2>
+      <p class="text-lg mb-10" style="color:var(--c300)">
+        14일이면 독립 쇼핑몰이 완성됩니다.
+      </p>
+
+      <div class="grid grid-cols-2 gap-6 mb-10" style="max-width:600px;width:100%;">
+        <a href="mailto:didtmdgus71@gmail.com" class="card-dark text-center p-6 block" style="text-decoration:none;border-color:rgba(96,165,250,.3);">
+          <div class="text-3xl mb-3">&#9993;</div>
+          <div class="font-bold text-white mb-1">이메일 문의</div>
+          <div class="text-sm" style="color:var(--c400)">didtmdgus71@gmail.com</div>
+        </a>
+        <a href="tel:010-3478-3396" class="card-dark text-center p-6 block" style="text-decoration:none;border-color:rgba(34,197,94,.3);">
+          <div class="text-3xl mb-3">&#128241;</div>
+          <div class="font-bold text-white mb-1">전화/카톡 문의</div>
+          <div class="text-sm" style="color:#86efac">010-3478-3396</div>
+        </a>
+      </div>
+
+      <div class="flex flex-wrap justify-center gap-3 mb-8">
+        <div class="px-4 py-2 rounded-full text-sm font-medium" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.7)">&#10003; 700만원 올인원</div>
+        <div class="px-4 py-2 rounded-full text-sm font-medium" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.7)">&#10003; 14일 완성</div>
+        <div class="px-4 py-2 rounded-full text-sm font-medium" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.7)">&#10003; Polar PG 연동</div>
+        <div class="px-4 py-2 rounded-full text-sm font-medium" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.7)">&#10003; 6개월 무상 보수</div>
+        <div class="px-4 py-2 rounded-full text-sm font-medium" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.7)">&#10003; 어드민 전체 구축</div>
+      </div>
+
+      <p class="mt-10 text-xs" style="color:rgba(255,255,255,.3)">원클릭사이트제작 &middot; Cafe24/아임웹 이관 전문팀 &middot; &copy; 2026</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<!-- Navigation -->
+<div id="nav">
+  <button class="nav-btn" onclick="go(-1)">&#8592;</button>
+  <span id="counter">1 / 7</span>
+  <button class="nav-btn" onclick="go(1)">&#8594;</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let cur = 0;
+
+  function show(i) {
+    slides.forEach((s, idx) => {
+      s.classList.remove('active','prev');
+      if (idx === i) s.classList.add('active');
+      else if (idx < i) s.classList.add('prev');
+    });
+    document.getElementById('counter').textContent = (i+1) + ' / ' + total;
+    document.getElementById('progress-bar').style.width = ((i+1)/total*100) + '%';
+    cur = i;
+  }
+
+  function go(d) {
+    const n = cur + d;
+    if (n >= 0 && n < total) show(n);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+  });
+
+  let tx = 0;
+  document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
+  });
+
+  show(0);
+</script>
+
+</body>
+</html>

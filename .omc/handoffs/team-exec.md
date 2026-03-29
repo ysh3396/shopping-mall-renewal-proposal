@@ -1,0 +1,16 @@
+## Handoff: team-exec → team-verify
+- **Decided**: 10개 리서치 토픽 모두 완료. 각 Worker가 웹 리서치 후 마크다운 파일 작성.
+- **Rejected**: N/A
+- **Risks**: 가설 "전자담배몰 이관 증가"는 W10에서 미확인 (94.7% SaaS 의존, 자사몰 전환 사례 없음). 대신 2026.04.24 온라인 판매 금지라는 더 큰 변수 발견. 리서치 방향이 "이관 트렌드 검증"에서 "향후 이관 필요성 근거"로 전환될 수 있음.
+- **Files**:
+  - w1-regulation-overview.md (278줄)
+  - w2-regulation-timeline.md (168줄)
+  - w3-online-sales-regulation.md (223줄)
+  - w4-platform-policy.md
+  - w5-cafe24-limitations.md (201줄)
+  - w6-imweb-limitations.md (227줄)
+  - w7-migration-cases.md (8건 사례)
+  - w8-market-data.md
+  - w9-community-voices.md (208줄)
+  - w10-competitive-landscape.md (138줄)
+- **Remaining**: 10 Reviewers가 각 파일의 품질/정확성/완성도 검증 → 최종 통합 리포트 + HTML 프레젠테이션 생성
