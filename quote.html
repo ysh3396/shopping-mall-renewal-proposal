@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>견적서 - 더본투비 쇼핑몰 리뉴얼</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #eee;
+            color: #222;
+            font-size: 12.5px;
+            line-height: 1.5;
+        }
+
+        .page {
+            width: 210mm;
+            height: 297mm;
+            margin: 20px auto;
+            background: #fff;
+            padding: 32px 40px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+            overflow: hidden;
+            position: relative;
+            page-break-after: always;
+        }
+
+        @media print {
+            body { background: #fff; }
+            .page {
+                margin: 0;
+                padding: 20px 30px;
+                box-shadow: none;
+                width: 210mm;
+                height: 297mm;
+                page-break-after: always;
+                overflow: hidden;
+            }
+            .no-print { display: none !important; }
+        }
+
+        /* ── Header ── */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 18px;
+        }
+
+        .doc-title {
+            font-size: 30px;
+            font-weight: 900;
+            letter-spacing: 10px;
+            color: #1a1a1a;
+            padding-top: 8px;
+        }
+
+        .company-box {
+            border: 1.5px solid #888;
+            font-size: 11.5px;
+            line-height: 1.8;
+            padding: 8px 14px;
+        }
+
+        .company-box table td.cb-label {
+            font-weight: 600;
+            padding-right: 6px;
+            white-space: nowrap;
+            color: #555;
+        }
+
+        /* ── Info Table ── */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+            font-size: 12px;
+        }
+
+        .info-table td {
+            padding: 5px 10px;
+            border: 1px solid #bbb;
+        }
+
+        .info-table .label {
+            background: #e2e8f0;
+            font-weight: 600;
+            width: 100px;
+            text-align: center;
+            color: #444;
+            letter-spacing: 2px;
+        }
+
+        /* ── Estimate Table ── */
+        .vat-note {
+            text-align: right;
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 3px;
+        }
+
+        .est {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .est th {
+            background: #2c5282;
+            color: #fff;
+            padding: 7px 8px;
+            font-weight: 600;
+            text-align: center;
+            border: 1px solid #2c5282;
+        }
+
+        .est td {
+            padding: 5px 8px;
+            border: 1px solid #ccc;
+        }
+
+        .est .item { text-align: left; }
+        .est .sub-item { text-align: left; padding-left: 20px; color: #444; }
+        .est .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .est .cen { text-align: center; }
+
+        .est .cat td {
+            background: #edf2f7;
+            font-weight: 700;
+            color: #2c5282;
+            border-bottom: 1.5px solid #a0aec0;
+        }
+
+        .est .sub td {
+            background: #f7fafc;
+            font-weight: 600;
+            text-align: center;
+            border-top: 1px solid #999;
+        }
+
+        .est .sub .num {
+            font-weight: 700;
+            color: #2c5282;
+        }
+
+        /* ── Total Row ── */
+        .total-row {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: -1px;
+        }
+
+        .total-row td {
+            padding: 9px 10px;
+            border: 1px solid #bbb;
+            font-size: 13px;
+        }
+
+        .total-row .t-label {
+            background: #2c5282;
+            color: #fff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .total-row .t-value {
+            text-align: right;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            font-size: 14px;
+        }
+
+        /* ── 견적금액 Highlight ── */
+        .final-box {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+
+        .final-box td {
+            padding: 12px 14px;
+        }
+
+        .final-box .f-label {
+            background: #c53030;
+            color: #fff;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: 4px;
+            border: 2.5px solid #c53030;
+            width: 130px;
+        }
+
+        .final-box .f-value {
+            text-align: right;
+            border: 2.5px solid #c53030;
+            color: #c53030;
+            font-weight: 900;
+            font-variant-numeric: tabular-nums;
+            font-size: 20px;
+        }
+
+        /* ── Payment Table ── */
+        .section-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #333;
+            margin: 20px 0 8px 0;
+        }
+
+        .pay {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            margin-bottom: 14px;
+        }
+
+        .pay th {
+            background: #4a5568;
+            color: #fff;
+            padding: 6px 8px;
+            font-weight: 500;
+            text-align: center;
+            border: 1px solid #4a5568;
+        }
+
+        .pay td {
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        .pay .num { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+        /* ── Notes ── */
+        .notes-label {
+            font-size: 13px;
+            font-weight: 700;
+            margin: 14px 0 6px 0;
+        }
+
+        .notes {
+            font-size: 11px;
+            color: #555;
+            line-height: 1.9;
+            padding: 8px 12px;
+            background: #fafafa;
+            border: 1px solid #ddd;
+        }
+
+        .notes li { margin-left: 14px; }
+
+        /* ── Footer ── */
+        .footer {
+            margin-top: 28px;
+            text-align: right;
+            font-size: 13px;
+            line-height: 2;
+        }
+
+        .footer .co { font-weight: 800; font-size: 15px; letter-spacing: 2px; }
+
+        .stamp {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .stamp .name { font-size: 14px; font-weight: 600; letter-spacing: 6px; }
+
+        .stamp .seal {
+            display: inline-block;
+            width: 64px;
+            height: 64px;
+            vertical-align: middle;
+        }
+
+        .stamp .seal img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* ── Print button ── */
+        .print-bar {
+            position: fixed; top: 0; left: 0; right: 0;
+            background: #2c5282; color: #fff;
+            padding: 12px 24px; display: flex; align-items: center; justify-content: space-between;
+            z-index: 100; font-size: 14px;
+        }
+        .print-btn {
+            background: #fff; color: #2c5282; border: none;
+            padding: 8px 24px; border-radius: 8px; font-weight: 700;
+            cursor: pointer; font-size: 13px;
+        }
+        .print-btn:hover { background: #e2e8f0; }
+    </style>
+</head>
+<body>
+
+<!-- Print bar (screen only) -->
+<div class="print-bar no-print">
+    <span>더본투비 쇼핑몰 리뉴얼 견적서 — A4 인쇄용 (Ctrl+P 또는 버튼 클릭)</span>
+    <button class="print-btn" onclick="window.print()">PDF로 저장 / 인쇄</button>
+</div>
+<div class="no-print" style="height:56px"></div>
+
+<!-- ========== PAGE 1: 견적서 ========== -->
+<div class="page" style="padding:24px 36px; font-size:11.5px;">
+
+    <!-- ===== Header ===== -->
+    <div class="header" style="margin-bottom:12px;">
+        <div class="doc-title">견 적 서</div>
+        <div class="company-box">
+            <table cellspacing="0">
+                <tr><td class="cb-label">상호:</td><td>원클릭사이트제작</td></tr>
+                <tr><td class="cb-label">대표:</td><td>양승현</td></tr>
+                <tr><td class="cb-label">종목:</td><td>소프트웨어 개발 용역</td></tr>
+                <tr><td class="cb-label">업태:</td><td>서비스</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- ===== 견적 정보 ===== -->
+    <table class="info-table">
+        <tr>
+            <td class="label">견적명</td>
+            <td colspan="3">더본투비 쇼핑몰 리뉴얼 (아임웹 → 독립몰 이관)</td>
+        </tr>
+        <tr>
+            <td class="label">수 신</td>
+            <td>더본투비 대표님 귀하</td>
+            <td class="label">견적일자</td>
+            <td>2026년 3월 30일</td>
+        </tr>
+        <tr>
+            <td class="label">견적유효기간</td>
+            <td>견적 후 1개월</td>
+            <td class="label">담당부서</td>
+            <td>개발팀</td>
+        </tr>
+        <tr>
+            <td class="label">개발기간</td>
+            <td>14일</td>
+            <td class="label">연 락 처</td>
+            <td>010-3478-3396</td>
+        </tr>
+        <tr>
+            <td class="label">무상보수</td>
+            <td>검수완료 후 6개월</td>
+            <td class="label">대 표 자</td>
+            <td>양승현</td>
+        </tr>
+    </table>
+
+    <!-- ===== 견적 명세 ===== -->
+    <div class="vat-note">(부가세 별도)</div>
+
+    <table class="est">
+        <thead>
+            <tr>
+                <th style="width:260px;">항 목</th>
+                <th style="width:50px;">수 량</th>
+                <th style="width:110px;">단 가</th>
+                <th style="width:110px;">금 액</th>
+                <th style="width:110px;">합</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            <!-- ── PM/기획 ── -->
+            <tr class="cat">
+                <td colspan="5">중급기획 1인 (프로젝트 관리 및 기획)</td>
+            </tr>
+            <tr>
+                <td class="sub-item">- 직접인건비 : 투입월(M/M)</td>
+                <td class="cen">0.1</td>
+                <td class="num">4,648,900</td>
+                <td class="num">464,900</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="sub-item">- 제경비 (직접인건비의 110%)</td>
+                <td></td>
+                <td class="num">5,113,800</td>
+                <td class="num">511,400</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="sub-item">- 기술료 ((직접인건비+제경비)의 20%)</td>
+                <td></td>
+                <td class="num">1,952,500</td>
+                <td class="num">195,300</td>
+                <td class="num" style="font-weight:700;">1,171,600</td>
+            </tr>
+
+            <!-- ── 프론트엔드 개발 ── -->
+            <tr class="cat">
+                <td colspan="5">중급개발자 (프론트엔드 — 쇼핑몰 UI, 관리자 페이지)</td>
+            </tr>
+            <tr>
+                <td class="sub-item">- 직접인건비 : 투입월(M/M)</td>
+                <td class="cen">0.3</td>
+                <td class="num">4,648,900</td>
+                <td class="num">1,394,700</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="sub-item">- 제경비 (직접인건비의 110%)</td>
+                <td></td>
+                <td class="num">5,113,800</td>
+                <td class="num">1,534,100</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="sub-item">- 기술료 ((직접인건비+제경비)의 20%)</td>
+                <td></td>
+                <td class="num">1,952,500</td>
+                <td class="num">585,800</td>
+                <td class="num" style="font-weight:700;">3,514,600</td>
+            </tr>
+
+            <!-- ── 백엔드 개발 ── -->
+            <tr class="cat">
+                <td colspan="5">중급개발자 (백엔드 — 데이터 이관, API, 결제/배송 연동)</td>
+            </tr>
+            <tr>
+                <td class="sub-item">- 직접인건비 : 투입월(M/M)</td>
+                <td class="cen">0.34</td>
+                <td class="num">4,648,900</td>
+                <td class="num">1,580,600</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="sub-item">- 제경비 (직접인건비의 110%)</td>
+                <td></td>
+                <td class="num">5,113,800</td>
+                <td class="num">1,738,700</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="sub-item">- 기술료 ((직접인건비+제경비)의 20%)</td>
+                <td></td>
+                <td class="num">1,952,500</td>
+                <td class="num">663,900</td>
+                <td class="num" style="font-weight:700;">3,983,200</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- ===== 합계 ===== -->
+    <table class="total-row">
+        <tr>
+            <td class="t-label" style="width:130px;">합계금액</td>
+            <td class="t-value">8,083,600</td>
+        </tr>
+    </table>
+
+    <table class="final-box" style="margin-top:4px;">
+        <tr>
+            <td class="f-label" style="padding:8px 10px; font-size:14px;">견적 금액</td>
+            <td class="f-value" style="padding:8px 10px; font-size:16px;">&#8361; 8,000,000</td>
+        </tr>
+    </table>
+
+    <!-- ===== 대금 지급 조건 ===== -->
+    <div class="section-label" style="margin:12px 0 6px;">대금 지급 조건</div>
+
+    <table class="pay">
+        <thead>
+            <tr>
+                <th style="width:50px;">차수</th>
+                <th>구 분</th>
+                <th style="width:70px;">비 율</th>
+                <th style="width:140px;">금액 (VAT 포함)</th>
+                <th>지급 시점</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1차</td>
+                <td>선금 (착수금)</td>
+                <td>50%</td>
+                <td class="num">&#8361; 4,400,000</td>
+                <td>계약 체결 시</td>
+            </tr>
+            <tr>
+                <td>2차</td>
+                <td>잔금 (완료금)</td>
+                <td>50%</td>
+                <td class="num">&#8361; 4,400,000</td>
+                <td>개발 완료 및 최종 검수 후</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- ===== 기타사항 ===== -->
+    <div class="notes-label" style="margin:10px 0 4px;">기타사항</div>
+
+    <div class="notes" style="padding:6px 10px; font-size:10.5px; line-height:1.7;">
+        <ul>
+            <li>상기 금액은 부가가치세(VAT 10%) 별도입니다.</li>
+            <li>개발 기간은 착수일로부터 14일이며, 기능 변경·추가 시 일정 및 비용이 변동될 수 있습니다.</li>
+            <li>검수 완료 후 6개월간 무상 유지보수를 제공합니다.</li>
+            <li>호스팅 비용(Vercel) 및 PG 수수료는 의뢰사 부담입니다. (대부분 무료입니다)</li>
+            <li>기존 회원 비밀번호는 암호화 문제로 이전 불가하며, 임시 비밀번호 발송 처리합니다.</li>
+            <li>본 견적서는 견적일로부터 30일간 유효합니다.</li>
+        </ul>
+    </div>
+
+    <!-- ===== Footer ===== -->
+    <div class="footer" style="margin-top:16px;">
+        <p>2026년 3월 30일</p>
+        <p class="co">원클릭사이트제작</p>
+        <div class="stamp">
+            <span>대표자:</span>
+            <span class="name">양 승 현</span>
+            <span class="seal" style="width:48px; height:48px;"><img src="donue_signature.png" alt="직인"></span>
+        </div>
+    </div>
+
+</div>
+
+<!-- ========== PAGE 2: 상세 개발 내역 ========== -->
+<div class="page" style="padding:20px 36px; font-size:11px;">
+
+    <div class="doc-title" style="font-size:22px; letter-spacing:6px; margin-bottom:2px;">상세 개발 내역</div>
+    <div style="text-align:center; font-size:11px; color:#888; margin-bottom:10px;">더본투비 쇼핑몰 리뉴얼 (아임웹 → 독립몰) - 별첨</div>
+
+    <!-- ── A. 프론트엔드 ── -->
+    <div class="section-label" style="border-bottom:2px solid #2c5282; padding-bottom:3px; margin:0 0 4px 0; font-size:12px;">A. 프론트엔드 개발 (Next.js — 쇼핑몰 + 관리자)</div>
+
+    <table class="est" style="font-size:11px;">
+        <thead>
+            <tr>
+                <th style="width:36px; padding:4px 6px;">No.</th>
+                <th style="width:80px; padding:4px 6px;">영역</th>
+                <th style="padding:4px 6px;">개발 항목</th>
+                <th style="width:55px; padding:4px 6px;">우선순위</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 쇼핑몰 -->
+            <tr class="cat"><td colspan="4">1. 더본투비 쇼핑몰</td></tr>
+            <tr><td class="cen">1-1</td><td class="cen">쇼핑몰</td><td class="item">아임웹 UI 클로닝 및 Next.js 재구성</td><td class="cen">P0</td></tr>
+            <tr><td class="cen">1-2</td><td class="cen">쇼핑몰</td><td class="item">상품 목록/상세 페이지, 카테고리 필터링</td><td class="cen">P0</td></tr>
+            <tr><td class="cen">1-3</td><td class="cen">쇼핑몰</td><td class="item">장바구니, 주문/결제 연동</td><td class="cen">P0</td></tr>
+            <tr><td class="cen">1-4</td><td class="cen">쇼핑몰</td><td class="item">회원가입/로그인, 마이페이지, 주문내역 조회</td><td class="cen">P0</td></tr>
+            <tr><td class="cen">1-5</td><td class="cen">쇼핑몰</td><td class="item">리뷰 작성/열람, 공지사항</td><td class="cen">P1</td></tr>
+            <tr><td class="cen">1-6</td><td class="cen">쇼핑몰</td><td class="item">검색 최적화(SEO) — 네이버/구글 유입 극대화</td><td class="cen">P1</td></tr>
+
+            <!-- 관리자 -->
+            <tr class="cat"><td colspan="4">2. 관리자 페이지 (어드민)</td></tr>
+            <tr><td class="cen">2-1</td><td class="cen">어드민</td><td class="item">상품 등록/수정 관리 UI</td><td class="cen">P0</td></tr>
+            <tr><td class="cen">2-2</td><td class="cen">어드민</td><td class="item">주문 관리 및 배송 처리 (우체국 택배 연동)</td><td class="cen">P0</td></tr>
+            <tr><td class="cen">2-3</td><td class="cen">어드민</td><td class="item">회원 관리</td><td class="cen">P0</td></tr>
+            <tr><td class="cen">2-4</td><td class="cen">어드민</td><td class="item">공지사항 관리</td><td class="cen">P1</td></tr>
+            <tr><td class="cen">2-5</td><td class="cen">어드민</td><td class="item">매출/주문 통계 대시보드</td><td class="cen">P1</td></tr>
+        </tbody>
+    </table>
+
+    <!-- ── B. 백엔드 ── -->
+    <div class="section-label" style="border-bottom:2px solid #2c5282; padding-bottom:3px; margin:12px 0 4px 0; font-size:12px;">B. 백엔드 개발 (Node.js) 및 데이터 이관</div>
+
+    <table class="est" style="font-size:11px;">
+        <thead>
+            <tr>
+                <th style="width:36px; padding:4px 6px;">No.</th>
+                <th style="width:80px; padding:4px 6px;">기능 영역</th>
+                <th style="padding:4px 6px;">개발 항목</th>
+                <th style="width:55px; padding:4px 6px;">우선순위</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 데이터 이관 -->
+            <tr class="cat"><td colspan="4">1. 아임웹 데이터 이관</td></tr>
+            <tr><td class="cen">1-1</td><td class="cen">이관</td><td class="item">회원 데이터 이관 (임시 비밀번호 발급 + 재설정 안내)</td><td class="cen">P0</td></tr>
+            <tr><td class="cen">1-2</td><td class="cen">이관</td><td class="item">상품 데이터 이관 (이미지, 옵션, 카테고리 포함)</td><td class="cen">P0</td></tr>
+            <tr><td class="cen">1-3</td><td class="cen">이관</td><td class="item">주문/결제 이력 이관</td><td class="cen">P0</td></tr>
+            <tr><td class="cen">1-4</td><td class="cen">이관</td><td class="item">포인트/등급/위시리스트/리뷰 이관</td><td class="cen">P1</td></tr>
+
+            <!-- API 개발 -->
+            <tr class="cat"><td colspan="4">2. API 개발</td></tr>
+            <tr><td class="cen">2-1</td><td class="cen">API</td><td class="item">상품 CRUD, 카테고리, 옵션 관리 API</td><td class="cen">P0</td></tr>
+            <tr><td class="cen">2-2</td><td class="cen">API</td><td class="item">주문/결제 처리 API (장바구니, 주문 생성, 상태 관리)</td><td class="cen">P0</td></tr>
+            <tr><td class="cen">2-3</td><td class="cen">API</td><td class="item">회원 인증 API (회원가입/로그인/비밀번호 재설정)</td><td class="cen">P0</td></tr>
+            <tr><td class="cen">2-4</td><td class="cen">API</td><td class="item">리뷰, 공지사항 API</td><td class="cen">P1</td></tr>
+
+            <!-- 외부 연동 -->
+            <tr class="cat"><td colspan="4">3. 외부 서비스 연동</td></tr>
+            <tr><td class="cen">3-1</td><td class="cen">결제</td><td class="item">PG 카드결제 연동</td><td class="cen">P0</td></tr>
+            <tr><td class="cen">3-2</td><td class="cen">배송</td><td class="item">우체국 택배 API 연동 (배송 조회/추적)</td><td class="cen">P0</td></tr>
+            <tr><td class="cen">3-3</td><td class="cen">알림</td><td class="item">주문확인/배송 알림 연동 (카카오 알림톡/SMS)</td><td class="cen">P1</td></tr>
+
+            <!-- 인프라 -->
+            <tr class="cat"><td colspan="4">4. 인프라 및 배포</td></tr>
+            <tr><td class="cen">4-1</td><td class="cen">인프라</td><td class="item">호스팅 환경 구축 (Vercel/AWS)</td><td class="cen">P0</td></tr>
+            <tr><td class="cen">4-2</td><td class="cen">인프라</td><td class="item">도메인 이전 및 DNS 설정</td><td class="cen">P0</td></tr>
+            <tr><td class="cen">4-3</td><td class="cen">인프라</td><td class="item">SSL 인증서 및 보안 설정</td><td class="cen">P0</td></tr>
+        </tbody>
+    </table>
+
+    <div style="position:absolute; bottom:20px; right:40px; font-size:11px; color:#aaa;">- 2 -</div>
+</div>
+
+</body>
+</html>
