@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { requireAuth, requirePermission } from "@/lib/rbac";
 
 export async function getProducts(params: {
   search?: string;
@@ -11,6 +12,7 @@ export async function getProducts(params: {
   page?: number;
   limit?: number;
 }) {
+  await requireAuth();
   const { search, categoryId, status, page = 1, limit = 20 } = params;
 
   const where: Record<string, unknown> = { deletedAt: null };
@@ -60,6 +62,7 @@ export async function getProducts(params: {
 }
 
 export async function getProduct(id: string) {
+  await requireAuth();
   const product = await db.product.findUnique({
     where: { id },
     include: {
@@ -89,6 +92,7 @@ export async function getProduct(id: string) {
 }
 
 export async function getCategories() {
+  await requireAuth();
   return db.category.findMany({
     where: { isActive: true },
     orderBy: { sortOrder: "asc" },
@@ -96,6 +100,7 @@ export async function getCategories() {
 }
 
 export async function createProduct(payload: string) {
+  await requirePermission("products", "create");
   const data = JSON.parse(payload) as {
     name: string;
     slug: string;
@@ -205,6 +210,7 @@ export async function createProduct(payload: string) {
 }
 
 export async function updateProduct(id: string, payload: string) {
+  await requirePermission("products", "update");
   const data = JSON.parse(payload) as {
     name: string;
     slug: string;
@@ -250,76 +256,105 @@ export async function updateProduct(id: string, payload: string) {
     },
   });
 
-  // Delete old related records (cascade handles nested)
-  await db.productImage.deleteMany({ where: { productId: id } });
-  await db.productVariant.deleteMany({ where: { productId: id } });
-  await db.productOption.deleteMany({ where: { productId: id } });
+  // Wrap all destructive + recreate operations in a transaction
+  await db.$transaction(async (tx) => {
+    // Delete images (safe — no FK from orders)
+    await tx.productImage.deleteMany({ where: { productId: id } });
 
-  // Re-create images
-  if (data.images.length > 0) {
-    await db.productImage.createMany({
-      data: data.images.map((img) => ({
-        productId: id,
-        url: img.url,
-        alt: img.alt || null,
-        sortOrder: img.sortOrder,
-      })),
+    // Soft-deactivate old variants instead of deleting — OrderItem FK must be preserved.
+    const variantsWithOrders = await tx.productVariant.findMany({
+      where: { productId: id, orderItems: { some: {} } },
+      select: { id: true },
     });
-  }
+    const referencedIds = new Set(variantsWithOrders.map((v) => v.id));
 
-  // Re-create options and collect value IDs
-  const valueIdMap: string[] = [];
+    // Before deleting options, detach referenced variants' VariantOptionValues
+    // to prevent cascade deletion from destroying order-linked option data.
+    if (referencedIds.size > 0) {
+      await tx.variantOptionValue.deleteMany({
+        where: { variantId: { in: [...referencedIds] } },
+      });
+      await tx.productVariant.updateMany({
+        where: { id: { in: [...referencedIds] } },
+        data: { isActive: false },
+      });
+    }
 
-  for (const opt of data.options) {
-    const option = await db.productOption.create({
-      data: {
-        productId: id,
-        name: opt.name,
-        sortOrder: opt.sortOrder,
-      },
+    // Delete unreferenced variants (safe to remove — cascade handles their VariantOptionValues)
+    await tx.productVariant.deleteMany({
+      where: { productId: id, id: { notIn: [...referencedIds] } },
     });
 
-    for (const val of opt.values) {
-      const optionValue = await db.productOptionValue.create({
+    // Now safe to delete options — no VariantOptionValues point to referenced variants anymore
+    await tx.productOption.deleteMany({ where: { productId: id } });
+
+    // Re-create images
+    if (data.images.length > 0) {
+      await tx.productImage.createMany({
+        data: data.images.map((img) => ({
+          productId: id,
+          url: img.url,
+          alt: img.alt || null,
+          sortOrder: img.sortOrder,
+        })),
+      });
+    }
+
+    // Re-create options and collect value IDs
+    const valueIdMap: string[] = [];
+
+    for (const opt of data.options) {
+      const option = await tx.productOption.create({
         data: {
-          optionId: option.id,
-          value: val.value,
-          sortOrder: val.sortOrder,
+          productId: id,
+          name: opt.name,
+          sortOrder: opt.sortOrder,
         },
       });
-      valueIdMap.push(optionValue.id);
-    }
-  }
 
-  // Re-create variants
-  for (const v of data.variants) {
-    const variant = await db.productVariant.create({
-      data: {
-        productId: id,
-        sku: v.sku || null,
-        price: v.price,
-        stock: v.stock,
-        isActive: v.isActive,
-      },
-    });
-
-    for (const idx of v.optionValueIndices) {
-      if (valueIdMap[idx]) {
-        await db.variantOptionValue.create({
+      for (const val of opt.values) {
+        const optionValue = await tx.productOptionValue.create({
           data: {
-            variantId: variant.id,
-            optionValueId: valueIdMap[idx],
+            optionId: option.id,
+            value: val.value,
+            sortOrder: val.sortOrder,
           },
         });
+        valueIdMap.push(optionValue.id);
       }
     }
-  }
+
+    // Re-create variants
+    for (const v of data.variants) {
+      const variant = await tx.productVariant.create({
+        data: {
+          productId: id,
+          sku: v.sku || null,
+          price: v.price,
+          stock: v.stock,
+          isActive: v.isActive,
+        },
+      });
+
+      for (const idx of v.optionValueIndices) {
+        if (valueIdMap[idx]) {
+          await tx.variantOptionValue.create({
+            data: {
+              variantId: variant.id,
+              optionValueId: valueIdMap[idx],
+            },
+          });
+        }
+      }
+    }
+  });
 
   revalidatePath("/admin/products");
   redirect("/admin/products");
 }
 
 export async function deleteProduct(id: string) {
+  await requirePermission("products", "delete");
   await db.product.update({
     where: { id },
     data: { deletedAt: new Date() },
@@ -329,6 +364,7 @@ export async function deleteProduct(id: string) {
 }
 
 export async function toggleProductStatus(id: string, isActive: boolean) {
+  await requirePermission("products", "update");
   await db.product.update({
     where: { id },
     data: { isActive },

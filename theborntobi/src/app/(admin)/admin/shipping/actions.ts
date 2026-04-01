@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { requireAuth, requirePermission } from "@/lib/rbac";
 
 export async function getShippingOrders(params: {
   status?: string;
@@ -9,6 +10,7 @@ export async function getShippingOrders(params: {
   page?: number;
   limit?: number;
 }) {
+  await requireAuth();
   const { status, search, page = 1, limit = 50 } = params;
 
   const statuses = status
@@ -56,8 +58,9 @@ export async function getShippingOrders(params: {
 export async function registerShipment(
   orderId: string,
   trackingNumber: string,
-  carrier: string = "로젠택배"
+  carrier: string = "우체국택배"
 ) {
+  await requirePermission("shipping", "create");
   await db.shipment.create({
     data: {
       orderId,
@@ -80,6 +83,7 @@ export async function updateShipmentStatus(
   shipmentId: string,
   status: string
 ) {
+  await requirePermission("shipping", "update");
   const updateData: Record<string, unknown> = { status };
   if (status === "DELIVERED") {
     updateData.deliveredAt = new Date();
@@ -101,6 +105,7 @@ export async function updateShipmentStatus(
 }
 
 export async function getShippingStats() {
+  await requireAuth();
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const tomorrow = new Date(today);

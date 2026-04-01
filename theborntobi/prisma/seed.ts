@@ -157,7 +157,7 @@ async function main() {
     { name: '팟/카트리지/코일', slug: 'pods', sortOrder: 2, isRestricted: true },
     { name: '무니코틴', slug: 'nicotine-free', sortOrder: 3, isRestricted: true },
     { name: '생활용품', slug: 'lifestyle', sortOrder: 4, isRestricted: false },
-    { name: '앵그리', slug: 'angry', sortOrder: 5, isRestricted: true },
+    { name: '❤️앵그리❤️', slug: 'angry', sortOrder: 5, isRestricted: true },
     { name: '기성 액상', slug: 'ready-liquid', sortOrder: 6, isRestricted: true },
     { name: '모드 액상', slug: 'mod-liquid', sortOrder: 7, isRestricted: true },
     { name: 'NEW 신상', slug: 'new-arrivals', sortOrder: 8, isRestricted: true },
@@ -197,8 +197,8 @@ async function main() {
 
   await prisma.productImage.createMany({
     data: [
-      { productId: product1.id, url: '/images/products/product-1-1.jpg', alt: 'RELX 인피니티 플러스 기기 메인', sortOrder: 0 },
-      { productId: product1.id, url: '/images/products/product-1-2.jpg', alt: 'RELX 인피니티 플러스 기기 상세', sortOrder: 1 },
+      { productId: product1.id, url: 'https://cdn.imweb.me/thumbnail/20230227/a554c65fa7f7a.png', alt: 'RELX 인피니티 플러스 기기 메인', sortOrder: 0 },
+      { productId: product1.id, url: 'https://cdn.imweb.me/thumbnail/20230314/f896897ec6166.png', alt: 'RELX 인피니티 플러스 기기 상세', sortOrder: 1 },
     ],
   });
 
@@ -248,8 +248,8 @@ async function main() {
 
   await prisma.productImage.createMany({
     data: [
-      { productId: product2.id, url: '/images/products/product-2-1.jpg', alt: '솔트 니코틴 액상 30ml 메인', sortOrder: 0 },
-      { productId: product2.id, url: '/images/products/product-2-2.jpg', alt: '솔트 니코틴 액상 30ml 상세', sortOrder: 1 },
+      { productId: product2.id, url: 'https://cdn.imweb.me/thumbnail/20230613/48bdebc097de9.jpg', alt: '솔트 니코틴 액상 30ml 메인', sortOrder: 0 },
+      { productId: product2.id, url: 'https://cdn.imweb.me/thumbnail/20230319/7654e1a664ff9.jpg', alt: '솔트 니코틴 액상 30ml 상세', sortOrder: 1 },
     ],
   });
 
@@ -318,8 +318,8 @@ async function main() {
 
   await prisma.productImage.createMany({
     data: [
-      { productId: product3.id, url: '/images/products/product-3-1.jpg', alt: 'JUUL 호환 팟 카트리지 메인', sortOrder: 0 },
-      { productId: product3.id, url: '/images/products/product-3-2.jpg', alt: 'JUUL 호환 팟 카트리지 상세', sortOrder: 1 },
+      { productId: product3.id, url: 'https://cdn.imweb.me/thumbnail/20230314/9c3b2278bb63e.png', alt: 'JUUL 호환 팟 카트리지 메인', sortOrder: 0 },
+      { productId: product3.id, url: 'https://cdn.imweb.me/thumbnail/20230124/3da74510a2d71.jpg', alt: 'JUUL 호환 팟 카트리지 상세', sortOrder: 1 },
     ],
   });
 
@@ -365,8 +365,8 @@ async function main() {
 
   await prisma.productImage.createMany({
     data: [
-      { productId: product4.id, url: '/images/products/product-4-1.jpg', alt: '무니코틴 프리미엄 액상 메인', sortOrder: 0 },
-      { productId: product4.id, url: '/images/products/product-4-2.jpg', alt: '무니코틴 프리미엄 액상 상세', sortOrder: 1 },
+      { productId: product4.id, url: 'https://cdn.imweb.me/thumbnail/20230615/ec4b2caaddc27.jpg', alt: '무니코틴 프리미엄 액상 메인', sortOrder: 0 },
+      { productId: product4.id, url: 'https://cdn.imweb.me/thumbnail/20230613/72d8bd1c23d53.jpg', alt: '무니코틴 프리미엄 액상 상세', sortOrder: 1 },
     ],
   });
 
@@ -436,8 +436,8 @@ async function main() {
 
   await prisma.productImage.createMany({
     data: [
-      { productId: product5.id, url: '/images/products/product-5-1.jpg', alt: '전자담배 휴대용 파우치 메인', sortOrder: 0 },
-      { productId: product5.id, url: '/images/products/product-5-2.jpg', alt: '전자담배 휴대용 파우치 상세', sortOrder: 1 },
+      { productId: product5.id, url: 'https://cdn.imweb.me/thumbnail/20240402/0d51f583e49db.jpg', alt: '전자담배 휴대용 파우치 메인', sortOrder: 0 },
+      { productId: product5.id, url: 'https://cdn.imweb.me/thumbnail/20260317/4b3b69046ecab.png', alt: '전자담배 휴대용 파우치 상세', sortOrder: 1 },
     ],
   });
 
@@ -662,7 +662,7 @@ async function main() {
   await prisma.shipment.create({
     data: {
       orderId: order3.id,
-      carrier: '로젠택배',
+      carrier: '우체국택배',
       trackingNumber: '1234567890',
       status: 'DELIVERED',
       shippedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
@@ -678,27 +678,43 @@ async function main() {
   await prisma.banner.createMany({
     data: [
       {
-        title: '신규 회원 10% 할인',
-        imageUrl: '/images/banners/hero-1.jpg',
-        linkUrl: '/signup',
+        title: '더본투비 히어로 배너 1',
+        imageUrl: 'https://cdn.imweb.me/thumbnail/20231220/10355eabef49a.jpg',
+        linkUrl: null,
         position: 'HERO',
         sortOrder: 0,
         isActive: true,
       },
       {
-        title: '봄맞이 특가전',
-        imageUrl: '/images/banners/hero-2.jpg',
-        linkUrl: '/collections/sale',
+        title: '더본투비 히어로 배너 2',
+        imageUrl: 'https://cdn.imweb.me/thumbnail/20240219/1414ee1a88aef.jpg',
+        linkUrl: null,
         position: 'HERO',
         sortOrder: 1,
         isActive: true,
       },
       {
-        title: '무니코틴 라인업 출시',
-        imageUrl: '/images/banners/hero-3.jpg',
-        linkUrl: '/category/nicotine-free',
+        title: '더본투비 히어로 배너 3',
+        imageUrl: 'https://cdn.imweb.me/thumbnail/20240619/95e9c6ffac000.png',
+        linkUrl: null,
         position: 'HERO',
         sortOrder: 2,
+        isActive: true,
+      },
+      {
+        title: '더본투비 히어로 배너 4',
+        imageUrl: 'https://cdn.imweb.me/thumbnail/20240424/61d9f4567e0cc.jpg',
+        linkUrl: null,
+        position: 'HERO',
+        sortOrder: 3,
+        isActive: true,
+      },
+      {
+        title: '더본투비 히어로 배너 5',
+        imageUrl: 'https://cdn.imweb.me/thumbnail/20240108/3667f7c6c72d8.png',
+        linkUrl: null,
+        position: 'HERO',
+        sortOrder: 4,
         isActive: true,
       },
     ],

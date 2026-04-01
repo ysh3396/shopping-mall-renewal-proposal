@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { requireAuth } from "@/lib/rbac";
 
 export async function getAuditLogs(params: {
   action?: string;
@@ -11,6 +12,7 @@ export async function getAuditLogs(params: {
   page?: number;
   limit?: number;
 }) {
+  await requireAuth();
   const {
     action = "",
     resource = "",
@@ -59,6 +61,7 @@ export async function getAuditLogs(params: {
 }
 
 export async function getAuditLogFilterOptions() {
+  await requireAuth();
   const [actions, resources, adminUsers] = await Promise.all([
     db.auditLog.findMany({
       select: { action: true },

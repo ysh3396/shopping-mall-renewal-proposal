@@ -3,12 +3,14 @@
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { DiscountType } from "@/generated/prisma/client";
+import { requireAuth, requirePermission } from "@/lib/rbac";
 
 export async function getCoupons(params: {
   search?: string;
   page?: number;
   limit?: number;
 }) {
+  await requireAuth();
   const { search = "", page = 1, limit = 20 } = params;
 
   const where: Record<string, unknown> = {};
@@ -50,6 +52,7 @@ export async function createCoupon(data: {
   expiresAt?: string | null;
   isActive: boolean;
 }) {
+  await requirePermission("promotions", "create");
   await db.coupon.create({
     data: {
       code: data.code.toUpperCase(),
@@ -82,6 +85,7 @@ export async function updateCoupon(
     isActive: boolean;
   }
 ) {
+  await requirePermission("promotions", "update");
   await db.coupon.update({
     where: { id },
     data: {
@@ -101,11 +105,13 @@ export async function updateCoupon(
 }
 
 export async function deleteCoupon(id: string) {
+  await requirePermission("promotions", "delete");
   await db.coupon.delete({ where: { id } });
   revalidatePath("/admin/promotions/coupons");
 }
 
 export async function toggleCouponStatus(id: string, isActive: boolean) {
+  await requirePermission("promotions", "update");
   await db.coupon.update({ where: { id }, data: { isActive } });
   revalidatePath("/admin/promotions/coupons");
 }

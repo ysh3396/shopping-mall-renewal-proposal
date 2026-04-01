@@ -7,6 +7,7 @@ import {
   Package,
   ShoppingCart,
   Truck,
+  RotateCcw,
   Users,
   Tag,
   Image,
@@ -15,6 +16,7 @@ import {
   Shield,
   FileText,
   LogOut,
+  FolderTree,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -45,6 +47,11 @@ const navSections: NavSection[] = [
         icon: <Package className="size-4" />,
       },
       {
+        label: "카테고리",
+        href: "/admin/categories",
+        icon: <FolderTree className="size-4" />,
+      },
+      {
         label: "주문 관리",
         href: "/admin/orders",
         icon: <ShoppingCart className="size-4" />,
@@ -54,6 +61,11 @@ const navSections: NavSection[] = [
         label: "배송 관리",
         href: "/admin/shipping",
         icon: <Truck className="size-4" />,
+      },
+      {
+        label: "반품/교환",
+        href: "/admin/returns",
+        icon: <RotateCcw className="size-4" />,
       },
     ],
   },
@@ -104,7 +116,7 @@ const navSections: NavSection[] = [
   },
 ];
 
-export function Sidebar() {
+export function Sidebar({ role }: { role?: string }) {
   const pathname = usePathname();
 
   function isActive(href: string) {

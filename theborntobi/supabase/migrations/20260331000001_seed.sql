@@ -756,7 +756,7 @@ BEGIN
   ) VALUES (
     gen_random_uuid()::TEXT,
     v_order3,
-    '로젠택배',
+    '우체국택배',
     '1234567890',
     'DELIVERED'::"ShipmentStatus",
     v_now - INTERVAL '6 days',

@@ -3,8 +3,10 @@
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { BannerPosition } from "@/generated/prisma/client";
+import { requireAuth, requirePermission } from "@/lib/rbac";
 
 export async function getBanners() {
+  await requireAuth();
   const banners = await db.banner.findMany({
     orderBy: [{ position: "asc" }, { sortOrder: "asc" }],
   });
@@ -21,6 +23,7 @@ export async function createBanner(data: {
   startsAt?: string | null;
   expiresAt?: string | null;
 }) {
+  await requirePermission("promotions", "create");
   await db.banner.create({
     data: {
       title: data.title,
@@ -49,6 +52,7 @@ export async function updateBanner(
     expiresAt?: string | null;
   }
 ) {
+  await requirePermission("promotions", "update");
   await db.banner.update({
     where: { id },
     data: {
@@ -66,11 +70,13 @@ export async function updateBanner(
 }
 
 export async function deleteBanner(id: string) {
+  await requirePermission("promotions", "delete");
   await db.banner.delete({ where: { id } });
   revalidatePath("/admin/promotions/banners");
 }
 
 export async function toggleBannerStatus(id: string, isActive: boolean) {
+  await requirePermission("promotions", "update");
   await db.banner.update({ where: { id }, data: { isActive } });
   revalidatePath("/admin/promotions/banners");
 }

@@ -3,8 +3,10 @@
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { RestrictionMode } from "@/generated/prisma/client";
+import { requireAuth, requirePermission } from "@/lib/rbac";
 
 export async function getDashboardStats() {
+  await requireAuth();
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
@@ -36,6 +38,7 @@ export async function getDashboardStats() {
 }
 
 export async function getRecentOrders(limit: number = 10) {
+  await requireAuth();
   const orders = await db.order.findMany({
     take: limit,
     orderBy: { createdAt: "desc" },
@@ -57,6 +60,7 @@ export async function getRecentOrders(limit: number = 10) {
 }
 
 export async function getTopProducts(limit: number = 5) {
+  await requireAuth();
   const items = await db.orderItem.groupBy({
     by: ["productId", "productName"],
     _count: { id: true },
@@ -86,6 +90,7 @@ export async function getTopProducts(limit: number = 5) {
 }
 
 export async function getCategories() {
+  await requireAuth();
   return db.category.findMany({
     where: { parentId: null },
     orderBy: { sortOrder: "asc" },
@@ -100,8 +105,49 @@ export async function getCategories() {
 }
 
 export async function getSiteConfig() {
+  await requireAuth();
   return db.siteConfig.findFirst({
     select: { id: true, restrictionMode: true },
+  });
+}
+
+export async function getLast7DaysSalesData() {
+  await requireAuth();
+  const DAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
+  const now = new Date();
+
+  // Build date buckets for the last 7 days (oldest first)
+  const buckets = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(now);
+    d.setDate(d.getDate() - (6 - i));
+    d.setHours(0, 0, 0, 0);
+    return d;
+  });
+
+  const since = buckets[0];
+  const until = new Date(now);
+  until.setHours(23, 59, 59, 999);
+
+  const orders = await db.order.findMany({
+    where: {
+      createdAt: { gte: since, lte: until },
+      status: { not: "CANCELLED" },
+    },
+    select: { createdAt: true, totalAmount: true },
+  });
+
+  return buckets.map((bucketStart) => {
+    const bucketEnd = new Date(bucketStart);
+    bucketEnd.setHours(23, 59, 59, 999);
+
+    const amount = orders
+      .filter((o) => o.createdAt >= bucketStart && o.createdAt <= bucketEnd)
+      .reduce((sum, o) => sum + o.totalAmount, 0);
+
+    return {
+      label: DAY_LABELS[bucketStart.getDay()],
+      amount,
+    };
   });
 }
 
@@ -109,6 +155,7 @@ export async function toggleCategoryRestriction(
   categoryId: string,
   restricted: boolean
 ) {
+  await requirePermission("settings", "update");
   await db.category.update({
     where: { id: categoryId },
     data: { isRestricted: restricted },
@@ -117,6 +164,7 @@ export async function toggleCategoryRestriction(
 }
 
 export async function updateRestrictionMode(mode: string) {
+  await requirePermission("settings", "update");
   const config = await db.siteConfig.findFirst({ select: { id: true } });
   if (!config) return;
   await db.siteConfig.update({

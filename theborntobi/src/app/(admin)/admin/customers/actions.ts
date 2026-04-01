@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { requireAuth, requirePermission } from "@/lib/rbac";
 
 export async function getCustomers(params: {
   search?: string;
@@ -9,6 +10,7 @@ export async function getCustomers(params: {
   page?: number;
   limit?: number;
 }) {
+  await requireAuth();
   const { search, gradeId, page = 1, limit = 20 } = params;
 
   const where: Record<string, unknown> = { deletedAt: null };
@@ -65,6 +67,7 @@ export async function getCustomers(params: {
 }
 
 export async function getCustomer(id: string) {
+  await requireAuth();
   const customer = await db.customer.findUnique({
     where: { id },
     include: {
@@ -102,10 +105,12 @@ export async function getCustomer(id: string) {
 }
 
 export async function getCustomerGrades() {
+  await requireAuth();
   return db.customerGrade.findMany({ orderBy: { minOrderAmount: "asc" } });
 }
 
 export async function updateCustomerGrade(customerId: string, gradeId: string) {
+  await requirePermission("customers", "update");
   await db.customer.update({
     where: { id: customerId },
     data: { gradeId },
@@ -116,6 +121,7 @@ export async function updateCustomerGrade(customerId: string, gradeId: string) {
 }
 
 export async function getCustomerStats() {
+  await requireAuth();
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 

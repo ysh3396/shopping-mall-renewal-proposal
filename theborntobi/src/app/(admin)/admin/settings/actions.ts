@@ -3,8 +3,10 @@
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { RestrictionMode } from "@/generated/prisma/client";
+import { requirePermission } from "@/lib/rbac";
 
 export async function getSiteConfig() {
+  await requirePermission("settings", "read");
   const config = await db.siteConfig.findFirst({
     orderBy: { createdAt: "asc" },
   });
@@ -28,6 +30,7 @@ export async function updateSiteConfig(data: {
   returnShippingFee?: number;
   restrictionMode?: string;
 }) {
+  await requirePermission("settings", "update");
   const existing = await db.siteConfig.findFirst({
     orderBy: { createdAt: "asc" },
   });

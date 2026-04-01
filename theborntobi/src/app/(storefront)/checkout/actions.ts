@@ -40,7 +40,7 @@ function generateOrderNumber(): string {
     now.getFullYear().toString() +
     String(now.getMonth() + 1).padStart(2, "0") +
     String(now.getDate()).padStart(2, "0");
-  const rand = String(Math.floor(Math.random() * 1000)).padStart(3, "0");
+  const rand = String(Math.floor(Math.random() * 1000000)).padStart(6, "0");
   return `ORD-${dateStr}-${rand}`;
 }
 
@@ -64,7 +64,7 @@ export async function createOrder(data: CreateOrderInput): Promise<
     return { error: "주문할 상품이 없습니다." };
   }
 
-  // Validate all variants exist and have sufficient stock
+  // Validate all variants exist, have sufficient stock, and re-verify prices server-side
   const variantIds = items.map((i) => i.variantId);
   const variants = await db.productVariant.findMany({
     where: { id: { in: variantIds } },
@@ -84,6 +84,8 @@ export async function createOrder(data: CreateOrderInput): Promise<
         error: `재고가 부족합니다: ${item.productName} (남은 수량: ${variant.stock}개)`,
       };
     }
+    // Server-side price verification — override client-provided price with DB truth
+    item.price = variant.price;
   }
 
   // Validate coupon if provided

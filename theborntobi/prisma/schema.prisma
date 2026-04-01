@@ -446,7 +446,7 @@ model Shipment {
   id             String         @id @default(cuid())
   orderId        String         @unique
   order          Order          @relation(fields: [orderId], references: [id])
-  carrier        String         @default("로젠택배")
+  carrier        String         @default("우체국택배")
   trackingNumber String?
   status         ShipmentStatus
   shippedAt      DateTime?

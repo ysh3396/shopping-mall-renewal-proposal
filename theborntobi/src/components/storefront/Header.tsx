@@ -23,7 +23,7 @@ export default function Header() {
         <div className="max-w-screen-xl mx-auto px-4 flex justify-between items-center">
           <div className="flex-1 mr-8 hidden md:block overflow-hidden">
             <div className="inline-block whitespace-nowrap animate-ticker">
-              &nbsp;&nbsp;&nbsp;&nbsp;전자담배 전문 쇼핑몰 더본투비 &nbsp;|&nbsp; 당일 오후 2시 이전 결제 시 당일 발송 &nbsp;|&nbsp; 우체국 택배 &nbsp;|&nbsp; 배송비 2,500원 (50,000원 이상 무료) &nbsp;|&nbsp; 고객센터 010-8514-2001 &nbsp;&nbsp;&nbsp;&nbsp;
+              &nbsp;&nbsp;&nbsp;&nbsp;전자담배 전문 쇼핑몰 더본투비 &nbsp;|&nbsp; 당일 오후 2시 이전 결제 시 당일 발송 &nbsp;|&nbsp; 우체국택배 &nbsp;|&nbsp; 배송비 2,500원 (50,000원 이상 무료) &nbsp;|&nbsp; 고객센터 010-8514-2001 &nbsp;&nbsp;&nbsp;&nbsp;
             </div>
           </div>
           <div className="flex items-center gap-4 ml-auto">

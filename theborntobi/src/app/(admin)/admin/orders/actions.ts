@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { OrderStatus } from "@/generated/prisma/client";
+import { requireAuth, requirePermission } from "@/lib/rbac";
 
 // Valid status transitions
 const VALID_TRANSITIONS: Record<string, string[]> = {
@@ -17,31 +18,6 @@ const VALID_TRANSITIONS: Record<string, string[]> = {
   EXCHANGE_REQUESTED: ["EXCHANGED", "CANCELLED"],
 };
 
-// Hardcoded system admin ID for audit logs (use real auth in production)
-const SYSTEM_ADMIN_ID = "system";
-
-async function getOrCreateSystemAdmin() {
-  let admin = await db.adminUser.findFirst({
-    where: { email: "system@theborntobi.com" },
-  });
-  if (!admin) {
-    let role = await db.role.findFirst({ where: { name: "super_admin" } });
-    if (!role) {
-      role = await db.role.create({
-        data: { name: "super_admin" },
-      });
-    }
-    admin = await db.adminUser.create({
-      data: {
-        email: "system@theborntobi.com",
-        name: "시스템",
-        passwordHash: "",
-        roleId: role.id,
-      },
-    });
-  }
-  return admin;
-}
 
 export async function getOrders(params: {
   search?: string;
@@ -49,6 +25,7 @@ export async function getOrders(params: {
   page?: number;
   limit?: number;
 }) {
+  await requireAuth();
   const { search, status, page = 1, limit = 20 } = params;
 
   const where: Record<string, unknown> = {};
@@ -99,6 +76,7 @@ export async function getOrders(params: {
 }
 
 export async function getOrder(id: string) {
+  await requireAuth();
   const order = await db.order.findUnique({
     where: { id },
     include: {
@@ -138,6 +116,7 @@ export async function getOrder(id: string) {
 }
 
 export async function updateOrderStatus(id: string, status: string) {
+  const adminUser = await requirePermission("orders", "update");
   const order = await db.order.findUnique({ where: { id } });
   if (!order) throw new Error("주문을 찾을 수 없습니다.");
 
@@ -150,10 +129,9 @@ export async function updateOrderStatus(id: string, status: string) {
 
   await db.order.update({ where: { id }, data: { status: status as OrderStatus } });
 
-  const admin = await getOrCreateSystemAdmin();
   await db.auditLog.create({
     data: {
-      adminUserId: admin.id,
+      adminUserId: adminUser.id,
       action: "UPDATE_STATUS",
       resource: "order",
       resourceId: id,
@@ -166,6 +144,7 @@ export async function updateOrderStatus(id: string, status: string) {
 }
 
 export async function confirmDeposit(orderId: string) {
+  const adminUser = await requirePermission("orders", "update");
   const order = await db.order.findUnique({
     where: { id: orderId },
     include: { payment: true },
@@ -173,14 +152,13 @@ export async function confirmDeposit(orderId: string) {
   if (!order) throw new Error("주문을 찾을 수 없습니다.");
   if (!order.payment) throw new Error("결제 정보가 없습니다.");
 
-  const admin = await getOrCreateSystemAdmin();
   const now = new Date();
 
   await db.payment.update({
     where: { orderId },
     data: {
       depositConfirmedAt: now,
-      depositConfirmedBy: admin.id,
+      depositConfirmedBy: adminUser.id,
       status: "COMPLETED",
       paidAt: now,
     },
@@ -193,7 +171,7 @@ export async function confirmDeposit(orderId: string) {
 
   await db.auditLog.create({
     data: {
-      adminUserId: admin.id,
+      adminUserId: adminUser.id,
       action: "CONFIRM_DEPOSIT",
       resource: "order",
       resourceId: orderId,
@@ -206,6 +184,7 @@ export async function confirmDeposit(orderId: string) {
 }
 
 export async function addOrderNote(orderId: string, note: string) {
+  const adminUser = await requirePermission("orders", "update");
   const order = await db.order.findUnique({ where: { id: orderId } });
   if (!order) throw new Error("주문을 찾을 수 없습니다.");
 
@@ -214,10 +193,9 @@ export async function addOrderNote(orderId: string, note: string) {
     data: { note },
   });
 
-  const admin = await getOrCreateSystemAdmin();
   await db.auditLog.create({
     data: {
-      adminUserId: admin.id,
+      adminUserId: adminUser.id,
       action: "ADD_NOTE",
       resource: "order",
       resourceId: orderId,
@@ -229,6 +207,7 @@ export async function addOrderNote(orderId: string, note: string) {
 }
 
 export async function getOrderStats() {
+  await requireAuth();
   const statuses = [
     "PENDING",
     "AWAITING_DEPOSIT",

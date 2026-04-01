@@ -377,7 +377,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           {/* Shipping info */}
           <div className="text-xs text-gray-500 bg-gray-50 rounded-lg p-3 border border-gray-100">
             <p>50,000원 이상 무료배송 / 기본 배송비 2,500원</p>
-            <p className="mt-0.5">당일 오후 2시 이전 결제 시 당일 발송 (우체국 택배)</p>
+            <p className="mt-0.5">당일 오후 2시 이전 결제 시 당일 발송 (우체국택배)</p>
           </div>
         </div>
       </div>

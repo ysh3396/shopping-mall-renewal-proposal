@@ -83,7 +83,7 @@ export default function Footer() {
               <h4 className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-2">
                 DELIVERY
               </h4>
-              <p className="text-sm text-gray-700">우체국 택배</p>
+              <p className="text-sm text-gray-700">우체국택배</p>
               <p className="text-xs text-gray-500 mt-1">
                 2,500원 (50,000원 이상 무료) · 제주/도서 +1,000원
               </p>

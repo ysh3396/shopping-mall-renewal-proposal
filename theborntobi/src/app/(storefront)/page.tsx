@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import HeroSlider from "@/components/storefront/HeroSlider";
 import ProductGrid from "@/components/storefront/ProductGrid";
+import ProductRequestForm from "./ProductRequestForm";
 
 export const dynamic = "force-dynamic";
 
@@ -17,11 +18,11 @@ export default async function HomePage() {
         orderBy: { sortOrder: "asc" },
       }),
       db.category.findMany({
-        where: { isActive: true, isRestricted: false },
+        where: { isActive: true },
         orderBy: { sortOrder: "asc" },
       }),
       db.product.findMany({
-        where: { isActive: true, isRestricted: false, deletedAt: null },
+        where: { isActive: true, deletedAt: null },
         orderBy: { sortOrder: "asc" },
         include: {
           images: { orderBy: { sortOrder: "asc" } },
@@ -38,6 +39,17 @@ export default async function HomePage() {
     <>
       <HeroSlider banners={banners} />
 
+      {/* Guide image map — matches original site's 더본투비 액상 가이드라인 section */}
+      <section className="max-w-screen-lg mx-auto px-4 py-8">
+        <a href="/products" className="block">
+          <img
+            src="https://cdn.imweb.me/thumbnail/20240827/e31a6d88c6862.png"
+            alt="더본투비 액상 가이드라인"
+            className="w-full rounded-lg"
+          />
+        </a>
+      </section>
+
       {/* Product request CTA */}
       <section className="bg-gray-900 text-white py-8">
         <div className="max-w-screen-xl mx-auto px-4">
@@ -50,29 +62,7 @@ export default async function HomePage() {
                 연락처로 가능 여부 알려드리겠습니다!
               </p>
             </div>
-            <form className="flex flex-col sm:flex-row gap-2 flex-1 w-full">
-              <input
-                type="text"
-                placeholder="상품명"
-                className="flex-1 bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-white placeholder-gray-500 outline-none focus:border-gray-500 transition"
-              />
-              <input
-                type="text"
-                placeholder="이름"
-                className="w-full sm:w-32 bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-white placeholder-gray-500 outline-none focus:border-gray-500 transition"
-              />
-              <input
-                type="tel"
-                placeholder="연락처 (010-0000-0000)"
-                className="flex-1 bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-white placeholder-gray-500 outline-none focus:border-gray-500 transition"
-              />
-              <button
-                type="button"
-                className="bg-white text-gray-900 font-bold px-6 py-2 rounded text-sm hover:bg-gray-100 transition-colors whitespace-nowrap"
-              >
-                요청하기
-              </button>
-            </form>
+            <ProductRequestForm />
           </div>
         </div>
       </section>

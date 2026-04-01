@@ -35,7 +35,7 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
     return (
       <div
         className="w-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center"
-        style={{ height: "clamp(220px, 45vw, 580px)" }}
+        style={{ height: "clamp(150px, 24.3vw, 462px)" }}
       >
         <span className="text-gray-400 text-sm">배너 없음</span>
       </div>
@@ -45,7 +45,7 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
   return (
     <section
       className="relative overflow-hidden bg-gray-100"
-      style={{ height: "clamp(220px, 45vw, 580px)" }}
+      style={{ height: "clamp(150px, 24.3vw, 462px)" }}
     >
       {banners.map((banner, i) => {
         const Wrapper = banner.linkUrl ? Link : "div";

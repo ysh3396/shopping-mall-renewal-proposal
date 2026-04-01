@@ -10,28 +10,20 @@ import {
   getTopProducts,
   getCategories,
   getSiteConfig,
+  getLast7DaysSalesData,
 } from "./actions";
-
-function getLast7DaysSalesData() {
-  const days = ["월", "화", "수", "목", "금", "토", "일"];
-  return days.map((label, i) => ({
-    label,
-    amount: [120000, 85000, 210000, 175000, 300000, 95000, 140000][i],
-  }));
-}
 
 export default async function AdminDashboard() {
   await connection();
-  const [stats, recentOrders, topProducts, categories, siteConfig] =
+  const [stats, recentOrders, topProducts, categories, siteConfig, salesData] =
     await Promise.all([
       getDashboardStats(),
       getRecentOrders(10),
       getTopProducts(5),
       getCategories(),
       getSiteConfig(),
+      getLast7DaysSalesData(),
     ]);
-
-  const salesData = getLast7DaysSalesData();
   const today = new Date().toLocaleDateString("ko-KR", {
     year: "numeric",
     month: "long",

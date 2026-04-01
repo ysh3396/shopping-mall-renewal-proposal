@@ -87,7 +87,7 @@ const shipmentStatusNext: Record<string, string> = {
 
 function TrackingRegistrationRow({ order }: { order: OrderRow }) {
   const [trackingNumber, setTrackingNumber] = useState("");
-  const [carrier, setCarrier] = useState("로젠택배");
+  const [carrier, setCarrier] = useState("우체국택배");
   const [isPending, startTransition] = useTransition();
 
   function handleRegister() {
@@ -126,10 +126,10 @@ function TrackingRegistrationRow({ order }: { order: OrderRow }) {
             onChange={(e) => setCarrier(e.target.value)}
             className="h-8 px-2 bg-white border border-slate-200 rounded text-xs text-slate-700 outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="로젠택배">로젠택배</option>
+            <option value="우체국택배">우체국택배</option>
             <option value="CJ대한통운">CJ대한통운</option>
             <option value="한진택배">한진택배</option>
-            <option value="우체국택배">우체국택배</option>
+            <option value="로젠택배">로젠택배</option>
           </select>
           <Input
             placeholder="운송장 번호"

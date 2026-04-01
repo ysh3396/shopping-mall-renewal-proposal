@@ -330,7 +330,7 @@ CREATE TABLE "Payment" (
 CREATE TABLE "Shipment" (
     "id" TEXT NOT NULL,
     "orderId" TEXT NOT NULL,
-    "carrier" TEXT NOT NULL DEFAULT '로젠택배',
+    "carrier" TEXT NOT NULL DEFAULT '우체국택배',
     "trackingNumber" TEXT,
     "status" "ShipmentStatus" NOT NULL,
     "shippedAt" TIMESTAMP(3),

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import { sanitizeHtml } from "@/lib/sanitize";
 import ProductDetailClient from "./product-detail-client";
 
 export const dynamic = "force-dynamic";
@@ -42,5 +43,11 @@ export default async function ProductDetailPage({
   if (product.isRestricted) notFound();
   if (product.deletedAt) notFound();
 
-  return <ProductDetailClient product={product} />;
+  // Sanitize detailHtml server-side to prevent XSS
+  const sanitizedProduct = {
+    ...product,
+    detailHtml: product.detailHtml ? sanitizeHtml(product.detailHtml) : null,
+  };
+
+  return <ProductDetailClient product={sanitizedProduct} />;
 }

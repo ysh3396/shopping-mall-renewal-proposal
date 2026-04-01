@@ -5,8 +5,10 @@ export default async function Navigation() {
   let categories: { id: string; name: string; slug: string }[] = [];
 
   try {
+    // Only show the 7 main navigation categories (matching original site)
+    const navSlugs = ["devices", "pods", "nicotine-free", "lifestyle", "angry", "ready-liquid", "mod-liquid"];
     categories = await db.category.findMany({
-      where: { isActive: true, isRestricted: false, parentId: null },
+      where: { isActive: true, slug: { in: navSlugs } },
       orderBy: { sortOrder: "asc" },
       select: { id: true, name: true, slug: true },
     });
