@@ -30,7 +30,7 @@ export default async function ProductsPage({
       },
     }),
     db.category.findMany({
-      where: { isActive: true, isRestricted: false },
+      where: { isActive: true },
       orderBy: { sortOrder: "asc" },
       select: { id: true, name: true, slug: true },
     }),

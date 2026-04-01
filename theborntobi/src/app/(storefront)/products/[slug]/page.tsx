@@ -40,7 +40,7 @@ export default async function ProductDetailPage({
 
   if (!product) notFound();
   if (!product.isActive) notFound();
-  if (product.isRestricted) notFound();
+  // isRestricted는 성인인증 UI용 플래그 — 스토어프론트 접근 차단에 사용하지 않음
   if (product.deletedAt) notFound();
 
   // Sanitize detailHtml server-side to prevent XSS
