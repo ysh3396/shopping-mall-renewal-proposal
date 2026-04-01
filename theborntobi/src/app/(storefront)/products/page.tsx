@@ -22,7 +22,7 @@ export default async function ProductsPage({
         isActive: true,
         deletedAt: null,
                 ...(q ? { name: { contains: q, mode: "insensitive" } } : {}),
-        ...(category ? { categoryId: category } : {}),
+        ...(category ? { category: { slug: category } } : {}),
       },
       orderBy: { sortOrder: "asc" },
       include: {
@@ -63,13 +63,13 @@ export default async function ProductsPage({
             {categories.map((cat) => {
               const params = new URLSearchParams();
               if (q) params.set("q", q);
-              params.set("category", cat.id);
+              params.set("category", cat.slug);
               return (
                 <Link
                   key={cat.id}
                   href={`/products?${params.toString()}`}
                   className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all whitespace-nowrap ${
-                    category === cat.id
+                    category === cat.slug
                       ? "bg-[#1a1a2e] text-white border-[#1a1a2e]"
                       : "bg-white text-slate-500 border-gray-200 hover:border-slate-400 hover:text-slate-800"
                   }`}
