@@ -1,7 +1,11 @@
 import 'dotenv/config';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { PrismaClient } from '../src/generated/prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log('Starting seed...');
@@ -165,6 +169,8 @@ async function main() {
     { name: '폐호흡', slug: 'dtl', sortOrder: 10, isRestricted: true },
     { name: '고농도', slug: 'high-nic', sortOrder: 11, isRestricted: true },
     { name: '일회용 전자담배', slug: 'disposable', sortOrder: 12, isRestricted: true },
+    { name: '떨이몰', slug: 'clearance', sortOrder: 13, isRestricted: true },
+    { name: 'PREMIUM', slug: 'premium', sortOrder: 14, isRestricted: true },
   ];
 
   const categories: Record<string, string> = {};
@@ -178,294 +184,68 @@ async function main() {
   // 6. Products with variants
   // ─────────────────────────────────────────────
 
-  // Product 1: RELX 인피니티 플러스 기기 — 컬러 3 variants
-  const product1 = await prisma.product.create({
-    data: {
-      name: 'RELX 인피니티 플러스 기기',
-      slug: 'relx-infinity-plus',
-      description: 'RELX 인피니티 플러스 전자담배 기기. 세련된 디자인과 뛰어난 성능.',
-      categoryId: categories['devices'],
-      basePrice: 35000,
-      comparePrice: 45000,
-      badges: 'BEST,HOT',
-      isActive: true,
-      isAdult: true,
-      isRestricted: false,
-      sortOrder: 1,
-    },
-  });
-
-  await prisma.productImage.createMany({
-    data: [
-      { productId: product1.id, url: 'https://cdn.imweb.me/thumbnail/20230227/a554c65fa7f7a.png', alt: 'RELX 인피니티 플러스 기기 메인', sortOrder: 0 },
-      { productId: product1.id, url: 'https://cdn.imweb.me/thumbnail/20230314/f896897ec6166.png', alt: 'RELX 인피니티 플러스 기기 상세', sortOrder: 1 },
-    ],
-  });
-
-  const option1Color = await prisma.productOption.create({
-    data: { productId: product1.id, name: '컬러', sortOrder: 0 },
-  });
-
-  const colors1 = ['블랙', '실버', '민트그린'];
-  const colorValueIds1: string[] = [];
-  for (let i = 0; i < colors1.length; i++) {
-    const val = await prisma.productOptionValue.create({
-      data: { optionId: option1Color.id, value: colors1[i], sortOrder: i },
-    });
-    colorValueIds1.push(val.id);
+  // ─────────────────────────────────────────────
+  // 6a. Products from crawled data (JSON import)
+  // ─────────────────────────────────────────────
+  interface SeedImage { url: string; alt: string; sortOrder: number }
+  interface SeedProduct {
+    originalId: string;
+    name: string;
+    slug: string;
+    basePrice: number;
+    comparePrice: number | null;
+    isActive: boolean;
+    isAdult: boolean;
+    sortOrder: number;
+    images: SeedImage[];
+    detailHtml: string | null;
   }
 
-  for (let i = 0; i < colors1.length; i++) {
-    const variant = await prisma.productVariant.create({
+  const productsJsonPath = join(__dirname, 'seed-data', 'products.json');
+  const seedProducts: SeedProduct[] = JSON.parse(readFileSync(productsJsonPath, 'utf-8'));
+  console.log(`Importing ${seedProducts.length} products from JSON...`);
+
+  const createdProductIds: string[] = [];
+
+  for (const sp of seedProducts) {
+    const product = await prisma.product.create({
       data: {
-        productId: product1.id,
-        sku: `RELX-INF-${colors1[i]}`,
-        price: 35000,
-        stock: 50,
-        isActive: true,
+        name: sp.name,
+        slug: sp.slug,
+        detailHtml: sp.detailHtml,
+        basePrice: sp.basePrice,
+        comparePrice: sp.comparePrice,
+        isActive: sp.isActive,
+        isAdult: sp.isAdult,
+        sortOrder: sp.sortOrder,
       },
     });
-    await prisma.variantOptionValue.create({
-      data: { variantId: variant.id, optionValueId: colorValueIds1[i] },
-    });
-  }
+    createdProductIds.push(product.id);
 
-  // Product 2: 솔트 니코틴 액상 30ml — 니코틴함량 x 맛 (2x3=6 variants)
-  const product2 = await prisma.product.create({
-    data: {
-      name: '솔트 니코틴 액상 30ml',
-      slug: 'salt-nicotine-30ml',
-      description: '프리미엄 솔트 니코틴 액상. 부드러운 목 넘김과 풍부한 맛.',
-      categoryId: categories['ready-liquid'],
-      basePrice: 15000,
-      badges: 'SALE',
-      isActive: true,
-      isAdult: true,
-      isRestricted: false,
-      sortOrder: 2,
-    },
-  });
-
-  await prisma.productImage.createMany({
-    data: [
-      { productId: product2.id, url: 'https://cdn.imweb.me/thumbnail/20230613/48bdebc097de9.jpg', alt: '솔트 니코틴 액상 30ml 메인', sortOrder: 0 },
-      { productId: product2.id, url: 'https://cdn.imweb.me/thumbnail/20230319/7654e1a664ff9.jpg', alt: '솔트 니코틴 액상 30ml 상세', sortOrder: 1 },
-    ],
-  });
-
-  const option2Nic = await prisma.productOption.create({
-    data: { productId: product2.id, name: '니코틴함량', sortOrder: 0 },
-  });
-  const option2Flavor = await prisma.productOption.create({
-    data: { productId: product2.id, name: '맛', sortOrder: 1 },
-  });
-
-  const nicStrengths = ['9.8mg', '20mg'];
-  const nicValueIds: string[] = [];
-  for (let i = 0; i < nicStrengths.length; i++) {
-    const val = await prisma.productOptionValue.create({
-      data: { optionId: option2Nic.id, value: nicStrengths[i], sortOrder: i },
-    });
-    nicValueIds.push(val.id);
-  }
-
-  const flavors2 = ['민트', '담배', '과일'];
-  const flavorValueIds2: string[] = [];
-  for (let i = 0; i < flavors2.length; i++) {
-    const val = await prisma.productOptionValue.create({
-      data: { optionId: option2Flavor.id, value: flavors2[i], sortOrder: i },
-    });
-    flavorValueIds2.push(val.id);
-  }
-
-  const stocks2 = [30, 20, 25, 15, 40, 10];
-  let variantIdx2 = 0;
-  for (let n = 0; n < nicStrengths.length; n++) {
-    for (let f = 0; f < flavors2.length; f++) {
-      const variant = await prisma.productVariant.create({
-        data: {
-          productId: product2.id,
-          sku: `SALT-LIQ-${nicStrengths[n]}-${flavors2[f]}`,
-          price: 15000,
-          stock: stocks2[variantIdx2++],
-          isActive: true,
-        },
-      });
-      await prisma.variantOptionValue.createMany({
-        data: [
-          { variantId: variant.id, optionValueId: nicValueIds[n] },
-          { variantId: variant.id, optionValueId: flavorValueIds2[f] },
-        ],
+    if (sp.images.length > 0) {
+      await prisma.productImage.createMany({
+        data: sp.images.map((img) => ({
+          productId: product.id,
+          url: img.url,
+          alt: img.alt,
+          sortOrder: img.sortOrder,
+        })),
       });
     }
-  }
 
-  // Product 3: JUUL 호환 팟 카트리지 — 맛 4 variants
-  const product3 = await prisma.product.create({
-    data: {
-      name: 'JUUL 호환 팟 카트리지',
-      slug: 'juul-compatible-pod',
-      description: 'JUUL 기기와 완벽하게 호환되는 프리미엄 팟 카트리지.',
-      categoryId: categories['pods'],
-      basePrice: 8000,
-      badges: 'BEST',
-      isActive: true,
-      isAdult: true,
-      isRestricted: false,
-      sortOrder: 3,
-    },
-  });
-
-  await prisma.productImage.createMany({
-    data: [
-      { productId: product3.id, url: 'https://cdn.imweb.me/thumbnail/20230314/9c3b2278bb63e.png', alt: 'JUUL 호환 팟 카트리지 메인', sortOrder: 0 },
-      { productId: product3.id, url: 'https://cdn.imweb.me/thumbnail/20230124/3da74510a2d71.jpg', alt: 'JUUL 호환 팟 카트리지 상세', sortOrder: 1 },
-    ],
-  });
-
-  const option3Flavor = await prisma.productOption.create({
-    data: { productId: product3.id, name: '맛', sortOrder: 0 },
-  });
-
-  const flavors3 = ['쿨민트', '리치라이치', '골든토바코', '클래식'];
-  const stocks3 = [45, 30, 60, 25];
-  for (let i = 0; i < flavors3.length; i++) {
-    const val = await prisma.productOptionValue.create({
-      data: { optionId: option3Flavor.id, value: flavors3[i], sortOrder: i },
-    });
-    const variant = await prisma.productVariant.create({
+    // Create a single default variant for each product
+    await prisma.productVariant.create({
       data: {
-        productId: product3.id,
-        sku: `JUUL-POD-${flavors3[i]}`,
-        price: 8000,
-        stock: stocks3[i],
-        isActive: true,
+        productId: product.id,
+        sku: `PROD-${sp.originalId}`,
+        price: sp.basePrice,
+        stock: 100,
+        isActive: sp.isActive,
       },
     });
-    await prisma.variantOptionValue.create({
-      data: { variantId: variant.id, optionValueId: val.id },
-    });
   }
 
-  // Product 4: 무니코틴 프리미엄 액상 — 용량 x 맛 (2x3=6 variants)
-  const product4 = await prisma.product.create({
-    data: {
-      name: '무니코틴 프리미엄 액상',
-      slug: 'nicotine-free-premium-liquid',
-      description: '니코틴 없는 프리미엄 액상. 풍부한 과일향으로 즐기는 건강한 베이핑.',
-      categoryId: categories['nicotine-free'],
-      basePrice: 12000,
-      badges: 'NEW',
-      isActive: true,
-      isAdult: true,
-      isRestricted: false,
-      sortOrder: 4,
-    },
-  });
-
-  await prisma.productImage.createMany({
-    data: [
-      { productId: product4.id, url: 'https://cdn.imweb.me/thumbnail/20230615/ec4b2caaddc27.jpg', alt: '무니코틴 프리미엄 액상 메인', sortOrder: 0 },
-      { productId: product4.id, url: 'https://cdn.imweb.me/thumbnail/20230613/72d8bd1c23d53.jpg', alt: '무니코틴 프리미엄 액상 상세', sortOrder: 1 },
-    ],
-  });
-
-  const option4Volume = await prisma.productOption.create({
-    data: { productId: product4.id, name: '용량', sortOrder: 0 },
-  });
-  const option4Flavor = await prisma.productOption.create({
-    data: { productId: product4.id, name: '맛', sortOrder: 1 },
-  });
-
-  const volumes4 = ['30ml', '60ml'];
-  const volumePrices4 = [12000, 20000];
-  const volumeValueIds4: string[] = [];
-  for (let i = 0; i < volumes4.length; i++) {
-    const val = await prisma.productOptionValue.create({
-      data: { optionId: option4Volume.id, value: volumes4[i], sortOrder: i },
-    });
-    volumeValueIds4.push(val.id);
-  }
-
-  const flavors4 = ['블루베리', '멜론', '복숭아'];
-  const flavorValueIds4: string[] = [];
-  for (let i = 0; i < flavors4.length; i++) {
-    const val = await prisma.productOptionValue.create({
-      data: { optionId: option4Flavor.id, value: flavors4[i], sortOrder: i },
-    });
-    flavorValueIds4.push(val.id);
-  }
-
-  let variantIdx4 = 0;
-  const stocks4 = [20, 15, 30, 10, 25, 18];
-  for (let v = 0; v < volumes4.length; v++) {
-    for (let f = 0; f < flavors4.length; f++) {
-      const variant = await prisma.productVariant.create({
-        data: {
-          productId: product4.id,
-          sku: `NF-LIQ-${volumes4[v]}-${flavors4[f]}`,
-          price: volumePrices4[v],
-          stock: stocks4[variantIdx4++],
-          isActive: true,
-        },
-      });
-      await prisma.variantOptionValue.createMany({
-        data: [
-          { variantId: variant.id, optionValueId: volumeValueIds4[v] },
-          { variantId: variant.id, optionValueId: flavorValueIds4[f] },
-        ],
-      });
-    }
-  }
-
-  // Product 5: 전자담배 휴대용 파우치 — 컬러 2 variants (not adult/restricted)
-  const product5 = await prisma.product.create({
-    data: {
-      name: '전자담배 휴대용 파우치',
-      slug: 'vape-portable-pouch',
-      description: '전자담배와 액상을 함께 보관할 수 있는 실용적인 파우치.',
-      categoryId: categories['lifestyle'],
-      basePrice: 9900,
-      badges: null,
-      isActive: true,
-      isAdult: false,
-      isRestricted: false,
-      sortOrder: 5,
-    },
-  });
-
-  await prisma.productImage.createMany({
-    data: [
-      { productId: product5.id, url: 'https://cdn.imweb.me/thumbnail/20240402/0d51f583e49db.jpg', alt: '전자담배 휴대용 파우치 메인', sortOrder: 0 },
-      { productId: product5.id, url: 'https://cdn.imweb.me/thumbnail/20260317/4b3b69046ecab.png', alt: '전자담배 휴대용 파우치 상세', sortOrder: 1 },
-    ],
-  });
-
-  const option5Color = await prisma.productOption.create({
-    data: { productId: product5.id, name: '컬러', sortOrder: 0 },
-  });
-
-  const colors5 = ['블랙', '네이비'];
-  const stocks5 = [80, 60];
-  for (let i = 0; i < colors5.length; i++) {
-    const val = await prisma.productOptionValue.create({
-      data: { optionId: option5Color.id, value: colors5[i], sortOrder: i },
-    });
-    const variant = await prisma.productVariant.create({
-      data: {
-        productId: product5.id,
-        sku: `POUCH-${colors5[i]}`,
-        price: 9900,
-        stock: stocks5[i],
-        isActive: true,
-      },
-    });
-    await prisma.variantOptionValue.create({
-      data: { variantId: variant.id, optionValueId: val.id },
-    });
-  }
-
-  console.log('Products and variants created.');
+  console.log(`${seedProducts.length} products imported from JSON.`);
 
   // ─────────────────────────────────────────────
   // 7. Sample Customers
@@ -517,14 +297,18 @@ async function main() {
   // 8. Sample Orders
   // ─────────────────────────────────────────────
 
-  // Fetch variants for order items
-  const relxVariant = await prisma.productVariant.findFirst({ where: { productId: product1.id } });
-  const saltVariant = await prisma.productVariant.findFirst({ where: { productId: product2.id } });
-  const juulVariant = await prisma.productVariant.findFirst({ where: { productId: product3.id } });
+  // Fetch variants for order items (use first 3 products from imported data)
+  const [pid1, pid2, pid3] = createdProductIds;
+  const relxVariant = await prisma.productVariant.findFirst({ where: { productId: pid1 } });
+  const saltVariant = await prisma.productVariant.findFirst({ where: { productId: pid2 } });
+  const juulVariant = await prisma.productVariant.findFirst({ where: { productId: pid3 } });
 
   if (!relxVariant || !saltVariant || !juulVariant) {
     throw new Error('Variants not found');
   }
+  const prod1 = await prisma.product.findUnique({ where: { id: pid1 } });
+  const prod2 = await prisma.product.findUnique({ where: { id: pid2 } });
+  const prod3 = await prisma.product.findUnique({ where: { id: pid3 } });
 
   const shippingAddress = {
     recipient: '김철수',
@@ -540,30 +324,30 @@ async function main() {
       orderNumber: 'ORD-20260101-001',
       customerId: customer1.id,
       status: 'AWAITING_DEPOSIT',
-      subtotal: 35000,
+      subtotal: relxVariant.price,
       shippingFee: 2500,
       discountAmount: 0,
-      totalAmount: 37500,
+      totalAmount: relxVariant.price + 2500,
       shippingAddress,
     },
   });
   await prisma.orderItem.create({
     data: {
       orderId: order1.id,
-      productId: product1.id,
+      productId: pid1,
       variantId: relxVariant.id,
-      productName: 'RELX 인피니티 플러스 기기',
-      variantName: '블랙',
-      price: 35000,
+      productName: prod1?.name ?? 'Product 1',
+      variantName: '기본',
+      price: relxVariant.price,
       quantity: 1,
-      subtotal: 35000,
+      subtotal: relxVariant.price,
     },
   });
   await prisma.payment.create({
     data: {
       orderId: order1.id,
       method: 'BANK_TRANSFER',
-      amount: 37500,
+      amount: relxVariant.price + 2500,
       status: 'AWAITING_DEPOSIT',
       bankName: '국민은행',
       accountNumber: '123456-78-901234',
@@ -585,30 +369,30 @@ async function main() {
       orderNumber: 'ORD-20260102-001',
       customerId: customer2.id,
       status: 'PAID',
-      subtotal: 30000,
+      subtotal: saltVariant.price * 2,
       shippingFee: 0,
       discountAmount: 0,
-      totalAmount: 30000,
+      totalAmount: saltVariant.price * 2,
       shippingAddress: shippingAddress2,
     },
   });
   await prisma.orderItem.create({
     data: {
       orderId: order2.id,
-      productId: product2.id,
+      productId: pid2,
       variantId: saltVariant.id,
-      productName: '솔트 니코틴 액상 30ml',
-      variantName: '9.8mg / 민트',
-      price: 15000,
+      productName: prod2?.name ?? 'Product 2',
+      variantName: '기본',
+      price: saltVariant.price,
       quantity: 2,
-      subtotal: 30000,
+      subtotal: saltVariant.price * 2,
     },
   });
   await prisma.payment.create({
     data: {
       orderId: order2.id,
       method: 'KAKAOPAY',
-      amount: 30000,
+      amount: saltVariant.price * 2,
       status: 'COMPLETED',
       pgProvider: 'kakaopay',
       pgTxId: 'KAKAO-TX-20260102-001',
@@ -629,30 +413,30 @@ async function main() {
       orderNumber: 'ORD-20260103-001',
       customerId: customer3.id,
       status: 'DELIVERED',
-      subtotal: 24000,
+      subtotal: juulVariant.price * 3,
       shippingFee: 2500,
       discountAmount: 0,
-      totalAmount: 26500,
+      totalAmount: juulVariant.price * 3 + 2500,
       shippingAddress: shippingAddress3,
     },
   });
   await prisma.orderItem.create({
     data: {
       orderId: order3.id,
-      productId: product3.id,
+      productId: pid3,
       variantId: juulVariant.id,
-      productName: 'JUUL 호환 팟 카트리지',
-      variantName: '쿨민트',
-      price: 8000,
+      productName: prod3?.name ?? 'Product 3',
+      variantName: '기본',
+      price: juulVariant.price,
       quantity: 3,
-      subtotal: 24000,
+      subtotal: juulVariant.price * 3,
     },
   });
   await prisma.payment.create({
     data: {
       orderId: order3.id,
       method: 'TOSSPAY',
-      amount: 26500,
+      amount: juulVariant.price * 3 + 2500,
       status: 'COMPLETED',
       pgProvider: 'tosspay',
       pgTxId: 'TOSS-TX-20260103-001',
