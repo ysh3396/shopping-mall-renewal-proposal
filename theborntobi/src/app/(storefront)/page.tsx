@@ -43,7 +43,7 @@ export default async function HomePage() {
       <section className="max-w-screen-lg mx-auto px-4 py-8">
         <a href="/products" className="block">
           <img
-            src="https://cdn.imweb.me/thumbnail/20240827/e31a6d88c6862.png"
+            src="https://chetppkxjsekjecnzbpp.supabase.co/storage/v1/object/public/images/products/e31a6d88c6862.png"
             alt="더본투비 액상 가이드라인"
             className="w-full rounded-lg"
           />

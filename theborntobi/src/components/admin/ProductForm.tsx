@@ -32,6 +32,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { createProduct, updateProduct } from "@/app/(admin)/admin/products/actions";
+import { uploadImage } from "@/app/(admin)/admin/products/upload-action";
 import type { Category } from "@/generated/prisma/client";
 
 // ─── Types ───────────────────────────────────────────
@@ -325,6 +326,10 @@ export function ProductForm({ categories, product }: Props) {
 
   // ─── Image Management ──────────────────────────
 
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+
   function addImage() {
     const trimmed = newImageUrl.trim();
     if (!trimmed) return;
@@ -334,6 +339,53 @@ export function ProductForm({ categories, product }: Props) {
 
   function removeImage(idx: number) {
     setImages(images.filter((_, i) => i !== idx));
+  }
+
+  async function handleFileUpload(files: FileList | File[]) {
+    const fileArray = Array.from(files);
+    if (fileArray.length === 0) return;
+
+    setIsUploading(true);
+    setUploadError("");
+
+    const newImages: ImageEntry[] = [];
+
+    for (const file of fileArray) {
+      const formData = new FormData();
+      formData.append("file", file);
+      const result = await uploadImage(formData);
+
+      if (result.error) {
+        setUploadError(result.error);
+        break;
+      }
+      if (result.url) {
+        newImages.push({ url: result.url, alt: "" });
+      }
+    }
+
+    if (newImages.length > 0) {
+      setImages((prev) => [...prev, ...newImages]);
+    }
+    setIsUploading(false);
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files.length > 0) {
+      handleFileUpload(e.dataTransfer.files);
+    }
+  }
+
+  function handleDragOver(e: React.DragEvent) {
+    e.preventDefault();
+    setIsDragging(true);
+  }
+
+  function handleDragLeave(e: React.DragEvent) {
+    e.preventDefault();
+    setIsDragging(false);
   }
 
   // ─── Badge toggle ──────────────────────────────
@@ -769,6 +821,52 @@ export function ProductForm({ categories, product }: Props) {
           <CardTitle>상품 이미지</CardTitle>
         </CardHeader>
         <CardContent className="pt-4 space-y-4">
+          {/* Drag & drop zone */}
+          <div
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+              isDragging
+                ? "border-blue-400 bg-blue-50"
+                : "border-slate-200 hover:border-slate-300"
+            }`}
+          >
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              multiple
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              onChange={(e) => {
+                if (e.target.files) handleFileUpload(e.target.files);
+                e.target.value = "";
+              }}
+            />
+            <div className="flex flex-col items-center gap-2">
+              {isUploading ? (
+                <>
+                  <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                  <p className="text-sm text-slate-500">업로드 중...</p>
+                </>
+              ) : (
+                <>
+                  <ImagePlus className="w-8 h-8 text-slate-400" />
+                  <p className="text-sm text-slate-500">
+                    이미지를 드래그하거나 클릭하여 업로드
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    JPG, PNG, WebP, GIF (최대 10MB)
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+
+          {uploadError && (
+            <p className="text-sm text-red-500">{uploadError}</p>
+          )}
+
+          {/* Image list */}
           {images.length > 0 && (
             <div className="space-y-2">
               {images.map((img, idx) => (
@@ -800,26 +898,32 @@ export function ProductForm({ categories, product }: Props) {
             </div>
           )}
 
-          <div className="flex items-center gap-2">
-            <Input
-              value={newImageUrl}
-              onChange={(e) => setNewImageUrl(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  addImage();
-                }
-              }}
-              placeholder="이미지 URL을 입력하세요"
-              className="flex-1"
-            />
-            <Button variant="outline" onClick={addImage}>
-              <ImagePlus className="w-4 h-4" />
-              추가
-            </Button>
-          </div>
+          {/* URL manual input (fallback) */}
+          <details className="text-sm">
+            <summary className="text-slate-400 cursor-pointer hover:text-slate-600">
+              URL로 직접 추가
+            </summary>
+            <div className="flex items-center gap-2 mt-2">
+              <Input
+                value={newImageUrl}
+                onChange={(e) => setNewImageUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addImage();
+                  }
+                }}
+                placeholder="이미지 URL을 입력하세요"
+                className="flex-1"
+              />
+              <Button variant="outline" onClick={addImage}>
+                <ImagePlus className="w-4 h-4" />
+                추가
+              </Button>
+            </div>
+          </details>
           <p className="text-xs text-slate-400">
-            이미지 URL을 입력하고 추가 버튼을 클릭하세요. 순서대로 정렬됩니다.
+            파일을 업로드하면 Supabase Storage에 자동 저장됩니다.
           </p>
         </CardContent>
       </Card>

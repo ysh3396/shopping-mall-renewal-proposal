@@ -463,7 +463,7 @@ async function main() {
     data: [
       {
         title: '더본투비 히어로 배너 1',
-        imageUrl: 'https://cdn.imweb.me/thumbnail/20231220/10355eabef49a.jpg',
+        imageUrl: 'https://chetppkxjsekjecnzbpp.supabase.co/storage/v1/object/public/images/banners/10355eabef49a.jpg',
         linkUrl: null,
         position: 'HERO',
         sortOrder: 0,
@@ -471,7 +471,7 @@ async function main() {
       },
       {
         title: '더본투비 히어로 배너 2',
-        imageUrl: 'https://cdn.imweb.me/thumbnail/20240219/1414ee1a88aef.jpg',
+        imageUrl: 'https://chetppkxjsekjecnzbpp.supabase.co/storage/v1/object/public/images/banners/1414ee1a88aef.jpg',
         linkUrl: null,
         position: 'HERO',
         sortOrder: 1,
@@ -479,7 +479,7 @@ async function main() {
       },
       {
         title: '더본투비 히어로 배너 3',
-        imageUrl: 'https://cdn.imweb.me/thumbnail/20240619/95e9c6ffac000.png',
+        imageUrl: 'https://chetppkxjsekjecnzbpp.supabase.co/storage/v1/object/public/images/banners/95e9c6ffac000.png',
         linkUrl: null,
         position: 'HERO',
         sortOrder: 2,
@@ -487,7 +487,7 @@ async function main() {
       },
       {
         title: '더본투비 히어로 배너 4',
-        imageUrl: 'https://cdn.imweb.me/thumbnail/20240424/61d9f4567e0cc.jpg',
+        imageUrl: 'https://chetppkxjsekjecnzbpp.supabase.co/storage/v1/object/public/images/banners/61d9f4567e0cc.jpg',
         linkUrl: null,
         position: 'HERO',
         sortOrder: 3,
@@ -495,7 +495,7 @@ async function main() {
       },
       {
         title: '더본투비 히어로 배너 5',
-        imageUrl: 'https://cdn.imweb.me/thumbnail/20240108/3667f7c6c72d8.png',
+        imageUrl: 'https://chetppkxjsekjecnzbpp.supabase.co/storage/v1/object/public/images/banners/3667f7c6c72d8.png',
         linkUrl: null,
         position: 'HERO',
         sortOrder: 4,
