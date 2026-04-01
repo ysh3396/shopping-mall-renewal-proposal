@@ -59,7 +59,7 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
             style={{ opacity: i === current ? 1 : 0, pointerEvents: i === current ? "auto" : "none" }}
           >
             {/* @ts-expect-error dynamic tag */}
-            <Wrapper {...wrapperProps} className="block w-full h-full">
+            <Wrapper {...wrapperProps} className="relative block w-full h-full">
               <Image
                 src={banner.imageUrl}
                 alt={banner.title}
