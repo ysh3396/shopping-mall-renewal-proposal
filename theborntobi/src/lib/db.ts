@@ -1,8 +1,20 @@
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
+function getRuntimeDatabaseUrl() {
+  const direct = process.env.DIRECT_DATABASE_URL;
+  if (direct) return direct;
+
+  const pooled = process.env.DATABASE_URL;
+  if (!pooled) {
+    throw new Error("DATABASE_URL is not set");
+  }
+
+  return pooled.replace(/\?pgbouncer=true&connection_limit=1$/, "");
+}
+
 function createPrismaClient() {
-  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+  const adapter = new PrismaPg({ connectionString: getRuntimeDatabaseUrl() });
   return new PrismaClient({ adapter });
 }
 
