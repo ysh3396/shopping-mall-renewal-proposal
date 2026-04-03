@@ -225,6 +225,38 @@ export async function createOrder(data: CreateOrderInput): Promise<
         });
       }
 
+      // Award points based on customer grade
+      const customer = await tx.customer.findUnique({
+        where: { id: guestCustomer!.id },
+        include: { grade: true },
+      });
+      if (customer?.grade && customer.grade.pointRate > 0) {
+        const grade = customer.grade;
+        if (subtotal >= grade.minPurchaseForPoint) {
+          const earned = Math.min(
+            Math.floor(subtotal * grade.pointRate),
+            grade.maxPointPerOrder > 0 ? grade.maxPointPerOrder : Infinity
+          );
+          if (earned > 0) {
+            const newBalance = (customer.points ?? 0) + earned;
+            await tx.customer.update({
+              where: { id: customer.id },
+              data: { points: newBalance },
+            });
+            await tx.pointTransaction.create({
+              data: {
+                customerId: customer.id,
+                amount: earned,
+                type: "PURCHASE",
+                description: `주문 ${orderNumber} 적립`,
+                orderId: newOrder.id,
+                balance: newBalance,
+              },
+            });
+          }
+        }
+      }
+
       return newOrder;
     });
 

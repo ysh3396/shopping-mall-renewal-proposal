@@ -186,22 +186,37 @@ model RolePermission {
 // ─────────────────────────────────────────────
 
 model Customer {
-  id                  String          @id @default(cuid())
-  username            String?         @unique
+  id                  String             @id @default(cuid())
+  username            String?            @unique
   passwordHash        String?
-  email               String          @unique
+  email               String             @unique
   name                String
   phone               String?
   // OAuth provider e.g. "kakao" | "naver" | "google" | "local"
   provider            String?
   providerId          String?
-  ageVerified         Boolean         @default(false)
+  ageVerified         Boolean            @default(false)
   ageVerifiedAt       DateTime?
   ageVerifyMethod     String?
   ageVerifyCI         String?
   ageVerifyExpiresAt  DateTime?
   gradeId             String?
-  grade               CustomerGrade?  @relation(fields: [gradeId], references: [id])
+  grade               CustomerGrade?     @relation(fields: [gradeId], references: [id])
+  // Migration fields
+  gender              String?
+  birthday            DateTime?
+  referralCode        String?            @unique
+  referredBy          String?
+  memberGroup         String?
+  loginCount          Int                @default(0)
+  lastLoginIp         String?
+  adminMemo           String?            @db.Text
+  imwebMemberCode     String?            @unique
+  totalPurchaseAmount Int                @default(0)
+  totalPurchaseCount  Int                @default(0)
+  points              Int                @default(0)
+  forcePasswordChange Boolean            @default(false)
+  // Relations
   orders              Order[]
   addresses           Address[]
   cart                Cart?
@@ -209,19 +224,40 @@ model Customer {
   qnas                QnA[]
   productRequests     ProductRequest[]
   couponUsages        CouponUsage[]
+  pointTransactions   PointTransaction[]
   deletedAt           DateTime?
-  createdAt           DateTime        @default(now())
-  updatedAt           DateTime        @updatedAt
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
 
   @@unique([provider, providerId])
 }
 
 model CustomerGrade {
-  id              String     @id @default(cuid())
-  name            String
-  minOrderAmount  Int        @default(0)
-  discountRate    Float      @default(0)
-  customers       Customer[]
+  id                  String     @id @default(cuid())
+  name                String     @unique
+  minOrderAmount      Int        @default(0)
+  discountRate        Float      @default(0)
+  pointRate           Float      @default(0)
+  minPurchaseForPoint Int        @default(1000)
+  maxPointPerOrder    Int        @default(0)
+  freeShipping        Boolean    @default(false)
+  sortOrder           Int        @default(0)
+  isDefault           Boolean    @default(false)
+  customers           Customer[]
+}
+
+model PointTransaction {
+  id          String   @id @default(cuid())
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id])
+  amount      Int
+  type        String
+  description String?
+  orderId     String?
+  balance     Int
+  createdAt   DateTime @default(now())
+
+  @@index([customerId])
 }
 
 model Address {
@@ -259,25 +295,31 @@ model Category {
 // ─────────────────────────────────────────────
 
 model Product {
-  id           String           @id @default(cuid())
-  name         String
-  slug         String           @unique
-  description  String?          @db.Text
-  detailHtml   String?          @db.Text
-  categoryId   String?
-  category     Category?        @relation(fields: [categoryId], references: [id])
-  basePrice    Int
-  comparePrice Int?
-  costPrice    Int?
+  id              String           @id @default(cuid())
+  name            String
+  slug            String           @unique
+  description     String?          @db.Text
+  detailHtml      String?          @db.Text
+  categoryId      String?
+  category        Category?        @relation(fields: [categoryId], references: [id])
+  basePrice       Int
+  comparePrice    Int?
+  costPrice       Int?
   // comma-separated: "SALE,BEST,HOT,NEW"
-  badges       String?
-  isActive     Boolean          @default(true)
-  isAdult      Boolean          @default(true)
-  isRestricted Boolean          @default(false)
-  sortOrder    Int              @default(0)
-  deletedAt    DateTime?
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
+  badges          String?
+  isActive        Boolean          @default(true)
+  isAdult         Boolean          @default(true)
+  isRestricted    Boolean          @default(false)
+  sortOrder       Int              @default(0)
+  imwebProductId  Int?             @unique
+  weight          Float?
+  origin          String?
+  manufacturer    String?
+  brand           String?
+  taxType         String?
+  deletedAt       DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
   images       ProductImage[]
   options      ProductOption[]
   variants     ProductVariant[]
@@ -378,25 +420,28 @@ model CartItem {
 // ─────────────────────────────────────────────
 
 model Order {
-  id              String           @id @default(cuid())
-  orderNumber     String           @unique
-  customerId      String
-  customer        Customer         @relation(fields: [customerId], references: [id])
-  status          OrderStatus
-  subtotal        Int
-  shippingFee     Int              @default(2500)
-  discountAmount  Int              @default(0)
-  totalAmount     Int
-  shippingAddress Json
-  note            String?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  items           OrderItem[]
-  payment         Payment?
-  shipment        Shipment?
-  refund          Refund?
-  returnRequest   ReturnRequest?
-  exchangeRequest ExchangeRequest?
+  id               String           @id @default(cuid())
+  orderNumber      String           @unique
+  imwebOrderNumber String?          @unique
+  customerId       String
+  customer         Customer         @relation(fields: [customerId], references: [id])
+  status           OrderStatus
+  subtotal         Int
+  shippingFee      Int              @default(2500)
+  discountAmount   Int              @default(0)
+  pointUsed        Int              @default(0)
+  couponDiscount   Int              @default(0)
+  totalAmount      Int
+  shippingAddress  Json
+  note             String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  items            OrderItem[]
+  payment          Payment?
+  shipment         Shipment?
+  refund           Refund?
+  returnRequest    ReturnRequest?
+  exchangeRequest  ExchangeRequest?
 }
 
 model OrderItem {
