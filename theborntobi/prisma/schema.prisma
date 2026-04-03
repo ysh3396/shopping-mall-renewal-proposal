@@ -187,6 +187,8 @@ model RolePermission {
 
 model Customer {
   id                  String          @id @default(cuid())
+  username            String?         @unique
+  passwordHash        String?
   email               String          @unique
   name                String
   phone               String?

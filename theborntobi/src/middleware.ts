@@ -6,7 +6,6 @@ export function middleware(request: NextRequest) {
 
   // Protect /admin routes (except /admin/login)
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-    // Check for session token (next-auth stores it as a cookie)
     const sessionToken =
       request.cookies.get("authjs.session-token")?.value ||
       request.cookies.get("__Secure-authjs.session-token")?.value;
@@ -18,9 +17,25 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // Protect storefront routes — cookie existence only (no JWT decode per CLAUDE.md)
+  // Auth pages (/auth/*) are excluded via matcher, so they remain accessible
+  if (!pathname.startsWith("/admin")) {
+    const customerToken =
+      request.cookies.get("customer-session-token")?.value ||
+      request.cookies.get("__Secure-customer-session-token")?.value;
+
+    if (!customerToken) {
+      const gateUrl = new URL("/auth/gate", request.url);
+      return NextResponse.redirect(gateUrl);
+    }
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: [
+    "/admin/:path*",
+    "/((?!_next|api|auth|favicon\\.ico|images|.*\\.).*)",
+  ],
 };

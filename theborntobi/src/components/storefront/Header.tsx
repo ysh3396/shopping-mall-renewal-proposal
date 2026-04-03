@@ -4,7 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export default function Header() {
+type HeaderProps = {
+  customerName?: string | null;
+};
+
+export default function Header({ customerName }: HeaderProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -27,12 +31,32 @@ export default function Header() {
             </div>
           </div>
           <div className="flex items-center gap-4 ml-auto">
-            <Link href="/mypage" className="hover:text-white transition-colors flex items-center gap-1">
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              마이페이지
-            </Link>
+            {customerName ? (
+              <>
+                <span className="text-gray-300 text-xs">
+                  <strong className="text-white">{customerName}</strong>님
+                </span>
+                <Link href="/mypage" className="hover:text-white transition-colors flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  마이페이지
+                </Link>
+                <button
+                  onClick={async () => {
+                    await fetch("/api/customer-auth/signout", { method: "POST" });
+                    window.location.href = "/auth/gate";
+                  }}
+                  className="hover:text-white transition-colors text-xs"
+                >
+                  로그아웃
+                </button>
+              </>
+            ) : (
+              <Link href="/auth/login" className="hover:text-white transition-colors flex items-center gap-1">
+                로그인
+              </Link>
+            )}
             <Link href="/cart" className="hover:text-white transition-colors flex items-center gap-1">
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />

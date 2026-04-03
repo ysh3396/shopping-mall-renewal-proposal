@@ -49,6 +49,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.role = (user as { role?: string }).role;
+        token.type = "admin";
       }
       return token;
     },
