@@ -8,8 +8,6 @@ import {
   processVerification,
   createVerificationToken,
   verifyVerificationToken,
-  getInicisAuthConfig,
-  hashCI,
 } from "@/lib/inicis-auth";
 
 export async function loginAction(formData: FormData) {
@@ -51,11 +49,6 @@ export async function checkEmailAction(email: string) {
     select: { id: true },
   });
   return { available: !existing };
-}
-
-export async function requestVerificationAction() {
-  const config = getInicisAuthConfig();
-  return config;
 }
 
 export async function processVerificationAction(

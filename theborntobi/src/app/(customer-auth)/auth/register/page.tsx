@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -185,27 +185,88 @@ export default function RegisterPage() {
     []
   );
 
+  // Listen for postMessage from 이니시스 popup
+  React.useEffect(() => {
+    function handleMessage(event: MessageEvent) {
+      // Only accept messages from our origin
+      if (event.origin !== window.location.origin) return;
+      try {
+        const data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+        if (data.success && data.token) {
+          setVerificationToken(data.token);
+          setVerifiedName(data.name || "");
+          setVerifiedPhone(data.phone || "");
+          setVerified(true);
+          setError("");
+        } else if (data.error) {
+          setError(data.error);
+        }
+      } catch {
+        // Not our message, ignore
+      }
+      setLoading(false);
+    }
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
+
   async function handleVerification() {
     setLoading(true);
     setError("");
 
     try {
-      // In mock mode, simulate verification
-      const result = await processVerificationAction({
-        mock: "true",
+      // 1. 서버에서 인증 요청 파라미터 가져오기
+      const res = await fetch("/api/customer-auth/inicis-request", {
+        method: "POST",
       });
+      const config = await res.json();
 
-      if ("error" in result && result.error) {
-        setError(result.error);
-      } else if ("success" in result && result.success) {
-        setVerificationToken(result.token!);
-        setVerifiedName(result.name!);
-        setVerifiedPhone(result.phone || "");
-        setVerified(true);
+      if (config.mock) {
+        // Mock mode — 서버 액션으로 직접 처리
+        const result = await processVerificationAction({ mock: "true" });
+        if ("error" in result && result.error) {
+          setError(result.error);
+          setLoading(false);
+        } else if ("success" in result && result.success) {
+          setVerificationToken(result.token!);
+          setVerifiedName(result.name!);
+          setVerifiedPhone(result.phone || "");
+          setVerified(true);
+          setLoading(false);
+        }
+        return;
       }
+
+      // 2. Real mode — 이니시스 팝업 열기
+      const popup = window.open("", "saPopup", "width=400,height=640,scrollbars=yes");
+      if (!popup) {
+        setError("팝업이 차단되었습니다. 팝업 차단을 해제해주세요.");
+        setLoading(false);
+        return;
+      }
+
+      // 3. hidden form 생성 후 이니시스로 POST
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = config.actionUrl;
+      form.target = "saPopup";
+      form.style.display = "none";
+
+      for (const [key, value] of Object.entries(config.params)) {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = value as string;
+        form.appendChild(input);
+      }
+
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+
+      // postMessage listener (useEffect above)가 결과를 수신
     } catch {
       setError("본인인증 처리 중 오류가 발생했습니다.");
-    } finally {
       setLoading(false);
     }
   }
