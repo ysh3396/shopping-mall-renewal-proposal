@@ -1,30 +1,38 @@
+import { db } from "@/lib/db";
 import HeroSlider from "@/components/storefront/HeroSlider";
 import ProductGrid from "@/components/storefront/ProductGrid";
 import ProductRequestForm from "./ProductRequestForm";
-import { getHomePageData } from "@/lib/storefront-db";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   let banners: { id: string; title: string; imageUrl: string; linkUrl: string | null; sortOrder: number }[] = [];
   let categories: { id: string; name: string; slug: string; sortOrder: number }[] = [];
-  let products: {
-    id: string;
-    name: string;
-    slug: string;
-    basePrice: number;
-    comparePrice: number | null;
-    badges: string | null;
-    sortOrder: number;
-    createdAt: Date;
-    images: { url: string; alt: string | null; sortOrder: number }[];
-    category: { id: string; name: string; slug: string } | null;
-  }[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let products: any[] = [];
 
   try {
-    ({ banners, categories, products } = await getHomePageData());
-  } catch (error) {
-    console.error("[storefront/home] failed to load data", error);
+    [banners, categories, products] = await Promise.all([
+      db.banner.findMany({
+        where: { position: "HERO", isActive: true },
+        orderBy: { sortOrder: "asc" },
+      }),
+      db.category.findMany({
+        where: { isActive: true },
+        orderBy: { sortOrder: "asc" },
+      }),
+      db.product.findMany({
+        where: { isActive: true, deletedAt: null },
+        orderBy: { sortOrder: "asc" },
+        include: {
+          images: { orderBy: { sortOrder: "asc" } },
+          category: true,
+          variants: { where: { isActive: true }, select: { stock: true } },
+        },
+      }),
+    ]);
+  } catch {
+    // DB not available yet - show empty state
   }
 
   return (

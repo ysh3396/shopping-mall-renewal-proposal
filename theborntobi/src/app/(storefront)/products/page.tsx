@@ -1,6 +1,6 @@
+import { db } from "@/lib/db";
 import ProductCard from "@/components/storefront/ProductCard";
 import Link from "next/link";
-import { getProductsPageData } from "@/lib/storefront-db";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +16,25 @@ export default async function ProductsPage({
 }) {
   const { q, category } = await searchParams;
 
-  const { products, categories } = await getProductsPageData({ q, category });
+  const [products, categories] = await Promise.all([
+    db.product.findMany({
+      where: {
+        isActive: true,
+        deletedAt: null,
+                ...(q ? { name: { contains: q, mode: "insensitive" } } : {}),
+        ...(category ? { category: { slug: category } } : {}),
+      },
+      orderBy: { sortOrder: "asc" },
+      include: {
+        images: { orderBy: { sortOrder: "asc" } },
+      },
+    }),
+    db.category.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: "asc" },
+      select: { id: true, name: true, slug: true },
+    }),
+  ]);
 
   return (
     <section className="py-10 bg-white min-h-screen">
