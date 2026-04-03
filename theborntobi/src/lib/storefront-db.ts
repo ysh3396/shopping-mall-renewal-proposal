@@ -2,21 +2,6 @@ import { Client } from "pg";
 
 type QueryValue = string | number | boolean | null;
 
-type ProductRow = {
-  id: string;
-  name: string;
-  slug: string;
-  basePrice: number | string;
-  comparePrice: number | string | null;
-  badges: string | null;
-  sortOrder: number | string | null;
-  createdAt: Date | string;
-  categoryId: string | null;
-  categoryName: string | null;
-  categorySlug: string | null;
-  images: StorefrontProductImage[] | null;
-};
-
 function getStorefrontConnectionString() {
   const pooled = process.env.DATABASE_URL;
   if (!pooled) {
@@ -73,7 +58,7 @@ export interface StorefrontProduct {
   images: StorefrontProductImage[];
 }
 
-function mapProductRow(row: ProductRow): StorefrontProduct {
+function mapProductRow(row: any): StorefrontProduct {
   return {
     id: row.id,
     name: row.name,
@@ -83,14 +68,13 @@ function mapProductRow(row: ProductRow): StorefrontProduct {
     badges: row.badges,
     sortOrder: Number(row.sortOrder ?? 0),
     createdAt: new Date(row.createdAt),
-    category:
-      row.categoryId && row.categoryName && row.categorySlug
-        ? {
-            id: row.categoryId,
-            name: row.categoryName,
-            slug: row.categorySlug,
-          }
-        : null,
+    category: row.categoryId
+      ? {
+          id: row.categoryId,
+          name: row.categoryName,
+          slug: row.categorySlug,
+        }
+      : null,
     images: Array.isArray(row.images) ? row.images : [],
   };
 }

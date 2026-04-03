@@ -3,16 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signOut, useSession } from "next-auth/react";
 
 export default function Header() {
   const router = useRouter();
-  const { data: session } = useSession();
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const sessionUser = session?.user as { userType?: "admin" | "customer" } | undefined;
-  const isCustomerLoggedIn = sessionUser?.userType === "customer";
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -32,27 +27,12 @@ export default function Header() {
             </div>
           </div>
           <div className="flex items-center gap-4 ml-auto">
-            {isCustomerLoggedIn ? (
-              <>
-                <Link href="/mypage" className="hover:text-white transition-colors flex items-center gap-1">
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  마이페이지
-                </Link>
-                <button
-                  onClick={() => signOut({ callbackUrl: "/" })}
-                  className="hover:text-white transition-colors"
-                >
-                  로그아웃
-                </button>
-              </>
-            ) : (
-              <>
-                <Link href="/login" className="hover:text-white transition-colors">로그인</Link>
-                <Link href="/register" className="hover:text-white transition-colors">회원가입</Link>
-              </>
-            )}
+            <Link href="/mypage" className="hover:text-white transition-colors flex items-center gap-1">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              마이페이지
+            </Link>
             <Link href="/cart" className="hover:text-white transition-colors flex items-center gap-1">
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -153,17 +133,7 @@ export default function Header() {
               <li><Link href="/" className="block px-6 py-2.5 text-sm font-semibold text-gray-800 hover:bg-gray-50" onClick={() => setMobileMenuOpen(false)}>HOME</Link></li>
               <li><Link href="/products" className="block px-6 py-2.5 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setMobileMenuOpen(false)}>전체 상품</Link></li>
               <li><Link href="/cart" className="block px-6 py-2.5 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setMobileMenuOpen(false)}>장바구니</Link></li>
-              {isCustomerLoggedIn ? (
-                <>
-                  <li><Link href="/mypage" className="block px-6 py-2.5 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setMobileMenuOpen(false)}>마이페이지</Link></li>
-                  <li><button className="block w-full px-6 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50" onClick={() => signOut({ callbackUrl: "/" })}>로그아웃</button></li>
-                </>
-              ) : (
-                <>
-                  <li><Link href="/login" className="block px-6 py-2.5 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setMobileMenuOpen(false)}>로그인</Link></li>
-                  <li><Link href="/register" className="block px-6 py-2.5 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setMobileMenuOpen(false)}>회원가입</Link></li>
-                </>
-              )}
+              <li><Link href="/mypage" className="block px-6 py-2.5 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setMobileMenuOpen(false)}>마이페이지</Link></li>
             </ul>
           </div>
         )}

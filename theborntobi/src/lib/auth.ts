@@ -6,7 +6,6 @@ import { db } from "@/lib/db";
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
-      id: "admin-credentials",
       name: "Admin Login",
       credentials: {
         email: { label: "이메일", type: "email" },
@@ -39,40 +38,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           email: user.email,
           name: user.name,
           role: user.role.name,
-          userType: "admin",
-        };
-      },
-    }),
-    Credentials({
-      id: "customer-credentials",
-      name: "Customer Login",
-      credentials: {
-        email: { label: "이메일", type: "email" },
-        password: { label: "비밀번호", type: "password" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
-
-        const customer = await db.customer.findUnique({
-          where: { email: credentials.email as string },
-          include: { grade: true },
-        });
-
-        if (!customer || customer.deletedAt || !customer.passwordHash) return null;
-
-        const isValid = await bcrypt.compare(
-          credentials.password as string,
-          customer.passwordHash
-        );
-
-        if (!isValid) return null;
-
-        return {
-          id: customer.id,
-          email: customer.email,
-          name: customer.name,
-          userType: "customer",
-          gradeName: customer.grade?.name ?? null,
         };
       },
     }),
@@ -84,8 +49,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.role = (user as { role?: string }).role;
-        token.userType = (user as { userType?: "admin" | "customer" }).userType;
-        token.gradeName = (user as { gradeName?: string | null }).gradeName;
       }
       return token;
     },
@@ -93,11 +56,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (session.user) {
         session.user.id = token.sub!;
         (session.user as { role?: string }).role = token.role as string;
-        (session.user as { userType?: "admin" | "customer" }).userType = token.userType as
-          | "admin"
-          | "customer";
-        (session.user as { gradeName?: string | null }).gradeName =
-          (token.gradeName as string | null) ?? null;
       }
       return session;
     },
