@@ -190,6 +190,7 @@ model Customer {
   email               String          @unique
   name                String
   phone               String?
+  passwordHash        String?
   // OAuth provider e.g. "kakao" | "naver" | "google" | "local"
   provider            String?
   providerId          String?

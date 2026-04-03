@@ -1,3 +1,5 @@
+import Image from "next/image";
+import Link from "next/link";
 import HeroSlider from "@/components/storefront/HeroSlider";
 import ProductGrid from "@/components/storefront/ProductGrid";
 import ProductRequestForm from "./ProductRequestForm";
@@ -33,13 +35,18 @@ export default async function HomePage() {
 
       {/* Guide image map — matches original site's 더본투비 액상 가이드라인 section */}
       <section className="max-w-screen-lg mx-auto px-4 py-8">
-        <a href="/products" className="block">
-          <img
-            src="https://chetppkxjsekjecnzbpp.supabase.co/storage/v1/object/public/images/products/e31a6d88c6862.png"
-            alt="더본투비 액상 가이드라인"
-            className="w-full rounded-lg"
-          />
-        </a>
+        <Link href="/products" className="block">
+          <div className="relative aspect-[16/7] w-full overflow-hidden rounded-lg">
+            <Image
+              src="https://chetppkxjsekjecnzbpp.supabase.co/storage/v1/object/public/images/products/e31a6d88c6862.png"
+              alt="더본투비 액상 가이드라인"
+              fill
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 1024px"
+              unoptimized
+            />
+          </div>
+        </Link>
       </section>
 
       {/* Product request CTA */}

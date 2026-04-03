@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -22,13 +22,7 @@ type Props = {
 };
 
 export default function CartDrawer({ open, onOpenChange }: Props) {
-  const [items, setItems] = useState<CartItem[]>([]);
-
-  useEffect(() => {
-    if (open) {
-      setItems(getCart());
-    }
-  }, [open]);
+  const items: CartItem[] = useMemo(() => (open ? getCart() : []), [open]);
 
   const total = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
