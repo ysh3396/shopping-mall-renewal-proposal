@@ -55,7 +55,8 @@ export function buildAuthRequestParams(mTxId: string) {
     successUrl: `${BASE_URL}/api/customer-auth/inicis-success`,
     failUrl: `${BASE_URL}/api/customer-auth/inicis-fail`,
     authHash: generateAuthHash(mTxId),
-    reservedMsg: "isUseToken=Y",
+    flgFixedUser: "N", // 특정 사용자 지정 안 함 (누구나 인증 가능)
+    reservedMsg: "",
   };
 }
 
@@ -72,22 +73,24 @@ export async function fetchInicisUserData(
   });
 
   if (!res.ok) {
+    console.error("[INICIS] authRequestUrl fetch failed:", res.status);
     return failResult();
   }
 
   const data = await res.json();
+  console.log("[INICIS] Server-to-server response:", JSON.stringify(data, null, 2));
 
   if (data.resultCode !== "0000") {
+    console.error("[INICIS] resultCode:", data.resultCode, data.resultMsg);
     return failResult();
   }
 
-  // SEED-128 복호화가 필요한 경우 여기서 처리
-  // isUseToken=Y 모드에서는 userName, userPhone, userBirthday, userCi, userDi가 SEED 암호화됨
-  // SEED 키는 계약 시 별도 제공 — 현재는 평문 또는 Base64로 전달되는 경우를 처리
   const userName = decodeField(data.userName);
   const userPhone = decodeField(data.userPhone);
   const userBirthday = decodeField(data.userBirthday);
   const userCi = decodeField(data.userCi);
+
+  console.log("[INICIS] Decoded — name:", userName, "birthday:", userBirthday, "ci length:", userCi?.length);
 
   if (!userCi || !userName || !userBirthday) {
     return failResult();
