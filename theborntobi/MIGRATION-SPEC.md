@@ -627,12 +627,40 @@ Step 6: 검증
 - middleware.ts에서 체크 (쿠키 기반)
 - `src/app/(storefront)/change-password/page.tsx` 신규 생성
 
+### 10-5. 아임웹 API 리버스 엔지니어링 — 무결 데이터 보강
+- **목표:** 엑셀 내보내기에 포함되지 않은 데이터를 아임웹 내부 API에서 직접 추출
+- **방법:** Proxyman MCP 또는 브라우저 DevTools Network 탭으로 XHR 캡처
+- **아임웹 내부 API 패턴:** `POST /admin/ajax/*.cm` (JWT 5분 만료, 브라우저 세션 필요)
+- **사이트 코드:** `S2022030712d611422a02a` / `u202203076225aebe365d7`
+
+#### 확보 필요 데이터:
+1. **카테고리 매핑 (CATE ID → 카테고리명)**
+   - 엑셀 상품의 카테고리는 `CATE10,CATE13,...` 형태의 ID만 존재
+   - 아임웹 어드민 쇼핑 > 카테고리 페이지에서 트리 구조 + CATE ID 매핑 캡처
+   - 캡처 후 `scripts/category-mapping.json` 생성
+2. **상품 썸네일 URL**
+   - 엑셀에 상품 썸네일 이미지 URL 미포함
+   - `/admin/ajax/shopping/product/get_product.cm` 또는 유사 엔드포인트에서 추출
+   - 추출 후 Supabase Storage로 이관
+3. **회원 추가 데이터**
+   - 엑셀에 없는 필드: 위시리스트, 장바구니 내역, 쿠폰 보유 현황
+   - `/admin/ajax/member/get_member.cm` 등에서 개별 회원 상세 조회
+4. **주문 결제 상세**
+   - PG 결제 정보 (결제수단 상세, 카드사, 승인번호 등)
+   - 엑셀에는 "선결제" 같은 기본 정보만 존재
+
+#### 확보된 API 엔드포인트 (member.js 분석):
+```
+/admin/ajax/member/get_member.cm       — 회원 상세
+/admin/ajax/member/get_group.cm        — 회원 그룹
+/admin/ajax/member/get_total_count.cm  — 총 회원 수
+/admin/ajax/member/get_group_count.cm  — 그룹별 회원 수
+/admin/ajax/member/request_excel_member_list.cm  — 엑셀 내보내기
+```
+
 ---
 
 ## 리버스 엔지니어링 결과 (추후 추가)
 
-> 아임웹 API 리버스 엔지니어링 결과는 별도 문서로 추가 예정.
-> - 카테고리 매핑 (CATE ID → 카테고리명)
-> - 회원 추가 데이터 (엑셀에 없는 필드)
-> - 상품 추가 데이터 (썸네일 URL, 옵션 상세)
-> - 주문 추가 데이터 (결제 상세)
+> 위 10-5 항목의 실행 결과를 여기에 추가 예정.
+> Proxyman MCP 또는 브라우저 캡처로 확보한 JSON 응답 기반.
